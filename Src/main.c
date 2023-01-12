@@ -19,10 +19,12 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "usb_device.h"
-#include "usbd_cdc_if.h"
+
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "usbd_cdc_if.h"
+#include "cli.h"
 
 /* USER CODE END Includes */
 
@@ -100,6 +102,8 @@ int main(void)
   uint8_t buf[100];
   sprintf(&buf[0], "DOM: hello\r\n");
 
+  cli_init(CDC_Transmit_FS);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -107,10 +111,10 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
 	  HAL_Delay(1000);
 	  HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
-	  CDC_Transmit_FS(&buf[0], strlen(&buf[0])) ;
-    /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
 }
