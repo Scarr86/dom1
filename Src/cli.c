@@ -6,13 +6,24 @@
  */
 #include "cli.h"
 
-const char * help = "h - help\r\n"
-		"? [option] [id] - state  all devices\r\n"
+const char * sep = " ,";
+
+const char * help = "\r\n/h - help\r\n"
+		"/? [option] [id] - state  all devices\r\n"
 		"options:\r\n"
 		"\t m - state all motor\r\n"
-		"\t id - concrete device\r\n";
+		"\t id - concrete device";
+#define CLI_BUF_SIZE (1000)
+char cbuf[CLI_BUF_SIZE];
+uint16_t cbuf_len;
+uint8_t cbuf_is_lock;
+uint8_t cbuf_owf;
 
 cli_sender_t sender;
+
+uint8_t def_sender(uint8_t * buf, uint16_t len);
+void parser_btn(uint8_t id, uint8_t * p);
+
 
 uint8_t def_sender(uint8_t * buf, uint16_t len){
 	return 0;
@@ -20,15 +31,133 @@ uint8_t def_sender(uint8_t * buf, uint16_t len){
 
 void cli_init(cli_sender_t cli_sender){
 	sender = cli_sender ? cli_sender: def_sender;
+	cbuf_len = 0;
+	cbuf_is_lock = 0;
+	cbuf_owf = 0;
 }
 
-void cli_parser(uint8_t * cmd, uint16_t len){
-	char * p = strtok(cmd, " ");
+void cli_get_buf(uint8_t * buf, uint16_t len){
+
+	if(!cbuf_is_lock){
+		if(cbuf_len + len < 1000){
+			memcpy(cbuf + cbuf_len, buf, len);
+			cbuf_len += len;
+			if(memchr(buf, '\r', len)){
+				cbuf_is_lock = 1;
+			}
+		}
+	}
+	else{
+		cbuf_owf = 1;
+	}
+}
+
+void cli_update(){
+
+	uint16_t len;
+	uint8_t * buf;
+
+	len = usb_receive(&buf);
+	if(cbuf_len + len < CLI_BUF_SIZE){
+		memcpy(cbuf + cbuf_len, buf, len);
+		cbuf_len += len;
+
+		while(1){
+			char * line_feed =  memchr(cbuf, '\r', cbuf_len);
+			if(line_feed == NULL)
+				break;
+
+			*line_feed = '\0';
+			char * cmd_start = memchr(cbuf, '/', line_feed - cbuf );
+			if(cmd_start){
+				cli_parser(cmd_start + 1, line_feed - cmd_start - 1 );
+			}
+			sender("\r\n", 2);
+			cbuf_len -= line_feed + 1 - cbuf;
+			memcpy(cbuf, line_feed + 1, cbuf_len);
+
+		}
+	}
+	else{
+		cbuf_len = 0;
+		cbuf_owf = 1;
+	}
+}
+
+
+void cli_parser(uint8_t * buf, uint16_t len){
+	uint16_t slen;
+
+	char * p = strtok(buf, sep);
+	if(strlen(p) > 1)
+		return;
 	switch(*p){
 		case 'h':
 			sender(help, strlen(help));
 		break;
+		case 'b':
+			p = strtok(NULL, sep);
+			if(p == NULL){
+				for(uint8_t i = 0; i < BUTTON_COUNT; ++i){
+					parser_btn( i+1 , NULL);
+				}
+				return;
+			}
+			parser_btn(atoi(p), strtok(NULL, sep));
+		break;
+		case 'l':
+			p = strtok(NULL, sep);
+			if(p == NULL){
+				slen = sprintf(cbuf, "\r\nLED"
+						"\r\nblink: %s"
+						"\r\nstate: %s", dom_led_mode() ? "on" : "off", dom_led_state() ? "on" : "off" );
+				sender(cbuf, slen);
+				return;
+			}
+			switch(*p){
+				case '-':
+					dom_led_set(0, LED_BLINK_OFF, 0);
+				break;
+				case '+':
+					dom_led_set(1, LED_BLINK_OFF, 0);
+				break;
+				case '~':
+					p = strtok(NULL, sep);
+					if(p == NULL){
+						dom_led_set(0, LED_BLINK_ON, 1);
+					}
+					else{
+						dom_led_set(0, LED_BLINK_ON, atoi(p));
+					}
+				break;
+			}
+		break;
+
+		default:
+		break;
 	}
 }
+
+void parser_btn(uint8_t id, uint8_t * p){
+	//char * p = strtok(cmd, sep);
+	uint16_t len;
+	if(p == NULL){
+		len = sprintf(cbuf, "\r\nBUTTON %d state: %d\r\n", id, btn_state_by_id(id));
+		sender(cbuf, len);
+		return;
+	}
+	switch(*p){
+		case '=':
+			p = strtok(NULL, sep);
+			if(p == NULL){
+				// TODO send setting btn id;
+				return;
+			}
+			//TODO set while has params
+		break;
+	}
+
+}
+
 
 

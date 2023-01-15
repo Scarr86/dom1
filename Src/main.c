@@ -25,6 +25,7 @@
 /* USER CODE BEGIN Includes */
 #include "usbd_cdc_if.h"
 #include "cli.h"
+#include "dom.h"
 
 /* USER CODE END Includes */
 
@@ -49,6 +50,7 @@ TIM_HandleTypeDef htim12;
 
 /* USER CODE BEGIN PV */
 
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -63,6 +65,7 @@ static void MX_TIM3_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
 
 /* USER CODE END 0 */
 
@@ -99,10 +102,8 @@ int main(void)
   MX_TIM1_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
-  uint8_t buf[100];
-  sprintf(&buf[0], "DOM: hello\r\n");
-
-  cli_init(CDC_Transmit_FS);
+  cli_init(usb_send);
+  dom_init();
 
   /* USER CODE END 2 */
 
@@ -113,8 +114,11 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  HAL_Delay(1000);
-	  HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
+
+	cli_update();
+	dom_update();
+	 //HAL_Delay(1000);
+	  //HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
   }
   /* USER CODE END 3 */
 }
