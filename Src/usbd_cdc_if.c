@@ -102,6 +102,9 @@ uint16_t tx_len;
 uint8_t rx_lock;
 uint8_t tx_lock;
 
+uint8_t observer_count;
+usb_observers_tt observers[4];
+
 
 /* USER CODE END PRIVATE_VARIABLES */
 
@@ -117,6 +120,8 @@ uint8_t tx_lock;
 extern USBD_HandleTypeDef hUsbDeviceFS;
 
 /* USER CODE BEGIN EXPORTED_VARIABLES */
+
+
 
 /* USER CODE END EXPORTED_VARIABLES */
 
@@ -357,6 +362,25 @@ uint8_t usb_send(uint8_t * buf, uint16_t len){
 		tx_len += len;
 	}
 	return retval;
+}
+
+uint8_t usb_subscribe(usb_observers_tt obs){
+	if(observer_count < 4){
+		observers[observer_count] = obs;
+		++observer_count;
+		return 0;
+	}
+	return 1;
+}
+void usb_update(){
+	uint16_t len = rx_len;
+
+	if(len){
+		for(uint8_t i = 0; i < observer_count; ++i){
+			observers[i](rx_buf, len);
+		}
+		rx_len -= len;
+	}
 }
 
 /* USER CODE END PRIVATE_FUNCTIONS_IMPLEMENTATION */

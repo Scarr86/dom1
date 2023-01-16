@@ -26,6 +26,7 @@
 #include "usbd_cdc_if.h"
 #include "cli.h"
 #include "dom.h"
+#include "timer.h"
 
 /* USER CODE END Includes */
 
@@ -103,6 +104,7 @@ int main(void)
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
   cli_init(usb_send);
+  usb_subscribe(cli_parser);
   dom_init();
 
   /* USER CODE END 2 */
@@ -115,8 +117,9 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 
-	cli_update();
-	dom_update();
+	timers_poll();
+	usb_update();
+	dom_poll();
 	 //HAL_Delay(1000);
 	  //HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
   }

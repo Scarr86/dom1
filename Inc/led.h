@@ -20,14 +20,17 @@ typedef struct{
 	uint32_t pin;
 	xTimer_tt timer;
 	LED_MODE mode;
+	uint16_t frq;
 }xLed_tt;
 
 void led_on(xLed_tt * led);
 void led_off(xLed_tt * led);
 void led_blink(xLed_tt * led , uint32_t frq);
-void led_update(xLed_tt * led);
+
+void led_on_timeout(xTimer_tt * t, void * thisArg);
 uint8_t led_state(xLed_tt * led);
 uint8_t led_mode(xLed_tt * led);
+uint16_t led_frq(xLed_tt * led);
 
 
 

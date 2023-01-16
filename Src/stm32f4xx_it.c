@@ -183,6 +183,7 @@ void PendSV_Handler(void)
 void SysTick_Handler(void)
 {
   /* USER CODE BEGIN SysTick_IRQn 0 */
+	timer_request_poll();
 
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
