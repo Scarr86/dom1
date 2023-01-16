@@ -112,7 +112,7 @@ uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len);
 uint16_t usb_receive(uint8_t ** buf);
 uint8_t usb_send(uint8_t * buf, uint16_t len);
 uint8_t usb_subscribe(usb_observers_tt obs);
-void usb_update();
+void usb_poll();
 
 
 /* USER CODE END EXPORTED_FUNCTIONS */

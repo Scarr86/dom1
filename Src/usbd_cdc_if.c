@@ -372,7 +372,7 @@ uint8_t usb_subscribe(usb_observers_tt obs){
 	}
 	return 1;
 }
-void usb_update(){
+void usb_poll(){
 	uint16_t len = rx_len;
 
 	if(len){

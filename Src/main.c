@@ -118,7 +118,7 @@ int main(void)
     /* USER CODE BEGIN 3 */
 
 	timers_poll();
-	usb_update();
+	usb_poll();
 	dom_poll();
 	 //HAL_Delay(1000);
 	  //HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
