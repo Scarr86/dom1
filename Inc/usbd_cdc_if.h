@@ -94,6 +94,10 @@ extern USBD_CDC_ItfTypeDef USBD_Interface_fops_FS;
 
 /* USER CODE BEGIN EXPORTED_VARIABLES */
 typedef void (*usb_observers_tt)(uint8_t * buf, uint16_t len);
+typedef struct xObserver{
+	struct xObserver * next;
+	usb_observers_tt observer;
+}xObserver_tt;
 
 /* USER CODE END EXPORTED_VARIABLES */
 

@@ -10,9 +10,26 @@ const char * sep = " ,";
 
 const char * help = "\r\n/h - help\r\n"
 		"/? [option] [id] - state  all devices\r\n"
-		"options:\r\n"
-		"\t m - state all motor\r\n"
-		"\t id - concrete device";
+		"option:\r\n"
+		"\t 'm' - state and settings all or [id] motor\r\n"
+		"\t 'b' - state and settings all or [id] button\r\n"
+		"\t 's' - state all or [id] sensor\r\n"
+		"\t 'o' - state all or [id] odometer\r\n"
+		"\t 'l' - state led\r\n"
+		"/m id option [speed, ...] - settings and control motor\r\n"
+		"option:\r\n"
+		"\t '=' - set [speed, ...]\r\n"
+		"\t '>' - turn forward\r\n"
+		"\t '<' - turn back\r\n"
+		"\t '*' - stop\r\n"
+		"/b id option [debounceTime, ...] - settings button\r\n"
+		"option:\r\n"
+		"\t '=' - set [debounceTime, ...]\r\n"
+		"/l option [frq,...] - setting and control led\r\n"
+		"option:\r\n"
+		"\t '+' - led on\r\n"
+		"\t '-' - led off\r\n"
+		"\t '~' - led blink mode [frq, ...]";
 #define CLI_BUF_SIZE (1000)
 char cbuf[CLI_BUF_SIZE];
 uint16_t cbuf_len;
@@ -78,23 +95,51 @@ void cli_cmd_parser(uint8_t * cmd){
 		case 'h':
 			sender(help, strlen(help));
 		break;
-		case 'b':
+		case '?':
 			p = strtok(NULL, sep);
 			if(p == NULL){
-				for(uint8_t i = 0; i < BUTTON_COUNT; ++i){
-					parser_btn( i+1 , NULL);
-				}
+				//TODO state all device
 				return;
 			}
-			parser_btn(atoi(p), strtok(NULL, sep));
+			switch(*p){
+				case 'b':
+					p = strtok(NULL, sep);
+					if(p == NULL){
+						for(uint8_t i = 0; i < BUTTON_COUNT; ++i){
+							parser_btn( i+1 , NULL);
+						}
+					}
+					parser_btn(atoi(p), NULL);
+				break;
+				case 'l':
+					slen = sprintf(cbuf, "\r\nLED"
+							"\r\nblink: %s"
+							"\r\nstate: %s"
+							"\r\nfrq: %d", dom_led_mode() ? "on" : "off", dom_led_state() ? "on" : "off", dom_led_frq() );
+					sender(cbuf, slen);
+				break;
+				default:
+					slen = sprintf(cbuf, "\r\nincorrect command");
+					sender(cbuf, slen);
+				break;
+			}
+
+		break;
+		case 'b':
+			p = strtok(NULL, sep);// read id
+			uint8_t id = atoi(p);
+			p = strtok(NULL, sep);// read option
+			if(p == NULL || id == 0){
+				slen = sprintf(cbuf, "\r\nincorrect command");
+				sender(cbuf, slen);
+				return;
+			}
+			parser_btn(id, p);
 		break;
 		case 'l':
 			p = strtok(NULL, sep);
 			if(p == NULL){
-				slen = sprintf(cbuf, "\r\nLED"
-						"\r\nblink: %s"
-						"\r\nstate: %s"
-						"\r\nfrq: %d", dom_led_mode() ? "on" : "off", dom_led_state() ? "on" : "off", dom_led_frq() );
+				slen = sprintf(cbuf, "\r\nincorrect command");
 				sender(cbuf, slen);
 				return;
 			}

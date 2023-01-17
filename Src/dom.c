@@ -52,7 +52,7 @@ int8_t btn_state_by_id(uint8_t id){
 	}
 	return btn_state(&btn[id - 1]);
 }
-uint16_t btn_debounce_time_by_id(uint8_t id){
+int16_t btn_debounce_time_by_id(uint8_t id){
 	if(id > BUTTON_COUNT){
 		return -1;
 	}

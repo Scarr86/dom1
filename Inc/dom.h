@@ -25,7 +25,7 @@ void dom_init();
 
 
 int8_t btn_state_by_id(uint8_t id);
-uint16_t btn_debounce_time_by_id(uint8_t id);
+int16_t btn_debounce_time_by_id(uint8_t id);
 
 
 uint8_t dom_led_mode();
