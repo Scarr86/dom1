@@ -27,7 +27,7 @@ void timer_add(xTimer_tt * timer);
 void timer_del(xTimer_tt * timer);
 void  timer_request_poll(void);
 
-void timer_set(xTimer_tt * t, uint32_t interval, on_timeout_fn on_timeou, void * thisArg);
+void timer_set(xTimer_tt * t, uint32_t interval, on_timeout_fn on_timeout, void * thisArg);
 void timer_reset(xTimer_tt *t);
 void timer_restart(xTimer_tt *t);
 void timer_stop(xTimer_tt * t);

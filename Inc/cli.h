@@ -20,6 +20,8 @@ void cli_init(cli_sender_tt cli_sender);
 void cli_parser(uint8_t * buf, uint16_t len);
 void cli_cmd_parser(uint8_t * cmd);
 
+void cli_btn_on_click(uint8_t id);
+
 
 
 

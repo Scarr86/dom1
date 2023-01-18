@@ -49,9 +49,6 @@ TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim12;
 
 /* USER CODE BEGIN PV */
-uint16_t pwm_value = 400;
-int8_t step = 1;
-
 
 /* USER CODE END PV */
 
@@ -105,9 +102,9 @@ int main(void)
   MX_TIM1_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
- // HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
+
   HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
- // setPWM(10);
+
   cli_init(usb_send);
   usb_subscribe(cli_parser);
   dom_init();
@@ -125,11 +122,6 @@ int main(void)
 	timers_poll();
 	usb_poll();
 	dom_poll();
-//	if(pwm_value == 400) step = 1;
-//	if(pwm_value == 500) step = -1;
-//	pwm_value += step;
-//	setPWM(pwm_value);
-//	HAL_Delay(4);
   }
   /* USER CODE END 3 */
 }
@@ -201,7 +193,7 @@ static void MX_TIM1_Init(void)
   htim1.Instance = TIM1;
   htim1.Init.Prescaler = 0;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 499;//10;
+  htim1.Init.Period = 499;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -226,7 +218,7 @@ static void MX_TIM1_Init(void)
   {
     Error_Handler();
   }
-  sConfigOC.Pulse = 500; //4;
+  sConfigOC.Pulse = 500;
   if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
   {
     Error_Handler();
@@ -270,7 +262,7 @@ static void MX_TIM3_Init(void)
   htim3.Instance = TIM3;
   htim3.Init.Prescaler = 0;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 10;
+  htim3.Init.Period = 499;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_PWM_Init(&htim3) != HAL_OK)
@@ -322,7 +314,7 @@ static void MX_TIM12_Init(void)
   htim12.Instance = TIM12;
   htim12.Init.Prescaler = 0;
   htim12.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim12.Init.Period = 10;
+  htim12.Init.Period = 499;
   htim12.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim12.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_PWM_Init(&htim12) != HAL_OK)
@@ -423,27 +415,6 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-void setPWM(uint16_t pwm_value){
-	TIM1->CCR2 = pwm_value;
-//	TIM_OC_InitTypeDef sConfigOC = {0};
-
-
-
-//	sConfigOC.OCMode = TIM_OCMODE_PWM1;
-//	sConfigOC.Pulse = pwm_value;
-//	sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-//	sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
-//	sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-//	sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
-//	sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
-//	if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
-//	{
-//		Error_Handler();
-//	}
-//	//HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
-//	HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_2);
-//	HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
-}
 
 /* USER CODE END 4 */
 

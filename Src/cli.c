@@ -33,7 +33,6 @@ const char * help = "\r\n/h - help\r\n"
 #define CLI_BUF_SIZE (1000)
 char cbuf[CLI_BUF_SIZE];
 uint16_t cbuf_len;
-uint8_t cbuf_is_lock;
 uint8_t cbuf_owf;
 
 cli_sender_tt sender;
@@ -49,8 +48,9 @@ uint8_t def_sender(uint8_t * buf, uint16_t len){
 void cli_init(cli_sender_tt cli_sender){
 	sender = cli_sender ? cli_sender: def_sender;
 	cbuf_len = 0;
-	cbuf_is_lock = 0;
 	cbuf_owf = 0;
+
+	dom_btn_subscribe(cli_btn_on_click);
 }
 
 void cli_parser(uint8_t * buf, uint16_t len){
@@ -84,6 +84,8 @@ void cli_parser(uint8_t * buf, uint16_t len){
 
 void cli_cmd_parser(uint8_t * cmd){
 	uint16_t slen;
+	uint8_t tbuf[80];
+	uint8_t id;
 
 	char * p = strtok(cmd, sep);
 	if(strlen(p) > 1){
@@ -98,7 +100,14 @@ void cli_cmd_parser(uint8_t * cmd){
 		case '?':
 			p = strtok(NULL, sep);
 			if(p == NULL){
-				//TODO state all device
+				sprintf(tbuf, "? b\0");
+				cli_cmd_parser(tbuf);
+				sprintf(tbuf, "? s\0");
+				cli_cmd_parser(tbuf);
+				sprintf(tbuf, "? m\0");
+				cli_cmd_parser(tbuf);
+				sprintf(tbuf, "? l\0");
+				cli_cmd_parser(tbuf);
 				return;
 			}
 			switch(*p){
@@ -108,6 +117,7 @@ void cli_cmd_parser(uint8_t * cmd){
 						for(uint8_t i = 0; i < BUTTON_COUNT; ++i){
 							parser_btn( i+1 , NULL);
 						}
+						return;
 					}
 					parser_btn(atoi(p), NULL);
 				break;
@@ -116,6 +126,35 @@ void cli_cmd_parser(uint8_t * cmd){
 							"\r\nblink: %s"
 							"\r\nstate: %s"
 							"\r\nfrq: %d", dom_led_mode() ? "on" : "off", dom_led_state() ? "on" : "off", dom_led_frq() );
+					sender(cbuf, slen);
+				break;
+				case 's':
+					p = strtok(NULL, sep);
+					if(p ==  NULL){
+						for(uint8_t i = 0; i < SENSOR_COUNT; ++i){
+							sprintf(tbuf, "? s %d\0", i+1);
+							cli_cmd_parser(tbuf);
+						}
+						return;
+					}
+					slen = sprintf(cbuf, "\r\nSENSOR %d\r\n"
+													"state: %d", atoi(p), dom_sensor_state_by_id(atoi(p)));
+					sender(cbuf, slen);
+				break;
+				case 'm':
+					p = strtok(NULL, sep);
+					if(p == NULL){
+						for(uint8_t i = 0; i < MOTOR_COUNT; ++i){
+							sprintf(tbuf, "? m %d\0", i+1);
+							cli_cmd_parser(tbuf);
+						}
+						return;
+					}
+					id = atoi(p);
+					slen = sprintf(cbuf, "\r\nMOTOR %d\r\n"
+							"state: %d\r\n"
+							"speed: %d\r\n"
+							"dir: %d", id, dom_motor_state(id), dom_motor_speed(id), dom_motor_dir(id));
 					sender(cbuf, slen);
 				break;
 				default:
@@ -166,6 +205,45 @@ void cli_cmd_parser(uint8_t * cmd){
 			}
 		break;
 
+		case 'm':
+			p = strtok(NULL, sep);
+			if(p == NULL){
+				slen = sprintf(cbuf, "\r\nincorrect command");
+				sender(cbuf, slen);
+				return;
+			}
+			id = atoi(p);
+			p = strtok(NULL, sep);
+			if(p == NULL){
+				slen = sprintf(cbuf, "\r\nincorrect command");
+				sender(cbuf, slen);
+				return;
+			}
+			switch(*p){
+				case '>':
+					dom_motor_forward(id);
+				break;
+				case '<':
+					dom_motor_back(id);
+				break;
+				case '*':
+					dom_motor_stop(id);
+				break;
+				case '=':
+					p = strtok(NULL, sep);
+					if(p == NULL){
+						dom_motor_set(id, 0);
+					}
+					dom_motor_set(id, atoi(p));
+				break;
+				default:
+					slen = sprintf(cbuf, "\r\nincorrect command");
+					sender(cbuf, slen);
+				break;
+			}
+
+		break;
+
 		default:
 			slen = sprintf(cbuf, "\r\nincorrect command");
 			sender(cbuf, slen);
@@ -184,7 +262,7 @@ void parser_btn(uint8_t id, uint8_t * p){
 	if(p == NULL){
 		slen = sprintf(cbuf, "\r\nBUTTON %d"
 				"\r\nstate: %d"
-				"\r\ndebounceTime: %d", id, btn_state_by_id(id), btn_debounce_time_by_id(id));
+				"\r\ndebounceTime: %d", id, dom_btn_state_by_id(id), dom_btn_debounce_time_by_id(id));
 		sender(cbuf, slen);
 		return;
 	}
@@ -192,10 +270,10 @@ void parser_btn(uint8_t id, uint8_t * p){
 		case '=':
 			p = strtok(NULL, sep);
 			if(p == NULL){
-				// TODO send setting btn id;
+				dom_btn_set(id, 0);
 				return;
 			}
-			//TODO set while has params
+			dom_btn_set(id, atoi(p));
 		break;
 		default:
 			slen = sprintf(cbuf, "\r\nincorrect command");
@@ -203,6 +281,15 @@ void parser_btn(uint8_t id, uint8_t * p){
 		break;
 	}
 
+}
+void cli_btn_on_click(uint8_t id){
+	parser_btn(id, NULL);
+	sender("\r\n", 2);
+}
+
+void cli_sensor_on_detected(uint8_t id){
+	sprintf(cbuf, "/? s %d\0", id);
+	sender("\r\n", 2);
 }
 
 

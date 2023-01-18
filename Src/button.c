@@ -16,7 +16,18 @@ uint16_t btn_debounceTime(xButton_tt * btn){
 	return btn->debounceTime;
 }
 uint8_t btn_poll(xButton_tt * btn){
+	uint8_t st = btn_state(btn);
+	if(st != btn->state){
+		btn->state = st;
+		timer_set(&btn->timer, btn->debounceTime, btn_on_tomeout, btn);
+	}
+}
 
+void btn_on_tomeout(xTimer_tt * t, void * thisArg){
+	xButton_tt * btn = (xButton_tt *) thisArg;
+	if(btn_state(btn) == 0){
+		btn->on_click();
+	}
 }
 
 uint8_t btn_state(xButton_tt * btn){
