@@ -8,9 +8,7 @@
 
 #include "dom.h"
 xLed_tt led = {
-		.GPIOx = GPIOB,
-		.pin = GPIO_PIN_14,
-		.frq = 1,
+		.ccr = (uint32_t)&TIM1->CCR2,
 };
 
 
@@ -39,7 +37,7 @@ xButton_tt btn[4] = {
 
 
 void dom_init(){
-	led_blink(&led, 1);
+	led_blink(&led, 3);
 }
 
 void dom_poll(){

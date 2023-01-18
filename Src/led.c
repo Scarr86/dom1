@@ -10,14 +10,14 @@
 void led_on(xLed_tt * led){
 	led->mode = LED_BLINK_OFF;
 	timer_stop(&led->timer);
-	HAL_GPIO_WritePin(led->GPIOx, led->pin, GPIO_PIN_RESET );
-
+	led->pwm_value = LED_MIN;
+	*((uint32_t *)led->ccr) = led->pwm_value;
 }
 void led_off(xLed_tt * led){
 	led->mode = LED_BLINK_OFF;
 	timer_stop(&led->timer);
-	HAL_GPIO_WritePin(led->GPIOx, led->pin, GPIO_PIN_SET );
-
+	led->pwm_value = LED_MAX;
+	*((uint32_t *)led->ccr) = led->pwm_value;
 }
 void led_blink(xLed_tt * led , uint32_t frq){
 	if(frq == 0){
@@ -29,11 +29,17 @@ void led_blink(xLed_tt * led , uint32_t frq){
 	}
 	led->mode = LED_BLINK_ON;
 	led->frq = frq;
-	timer_set(&led->timer, 1000 / frq, led_on_timeout, led);
+	led->pwm_value = LED_MAX;
+	timer_set(&led->timer, frq, led_on_timeout, led);
 }
 
 uint8_t led_state(xLed_tt * led){
-	return !HAL_GPIO_ReadPin(led->GPIOx, led->pin);
+	if(led->mode == LED_BLINK_OFF){
+		if(led->pwm_value == LED_MIN){
+			return 1;
+		}
+	}
+	return 0;
 }
 uint8_t led_mode(xLed_tt * led){
 	return led->mode;
@@ -44,8 +50,12 @@ uint16_t led_frq(xLed_tt * led){
 
 void led_on_timeout(xTimer_tt * t,  void * thisArg){
 	xLed_tt * led = (xLed_tt *) thisArg;
+
 	timer_reset(t);
-	HAL_GPIO_TogglePin(led->GPIOx, led->pin);
+	if(led->pwm_value < (LED_MIN + 1)) led->step = 1;
+	if(led->pwm_value > (LED_MAX - 1)) led->step = -1;
+	led->pwm_value += led->step;
+	*((uint32_t *)led->ccr) = led->pwm_value;
 }
 
 

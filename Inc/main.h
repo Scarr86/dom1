@@ -73,8 +73,6 @@ void Error_Handler(void);
 #define GP_REL_1_GPIO_Port GPIOG
 #define DIR_REL_Pin GPIO_PIN_1
 #define DIR_REL_GPIO_Port GPIOG
-#define LED_Pin GPIO_PIN_14
-#define LED_GPIO_Port GPIOB
 #define PWM1_Pin GPIO_PIN_15
 #define PWM1_GPIO_Port GPIOB
 #define CLOSE_1_Pin GPIO_PIN_10

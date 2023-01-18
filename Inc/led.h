@@ -10,14 +10,18 @@
 #include "timer.h"
 #include "main.h"
 
+#define LED_MIN (400)
+#define LED_MAX (500)
+
 typedef enum{
 	LED_BLINK_OFF,
 	LED_BLINK_ON
 }LED_MODE;
 
 typedef struct{
-	GPIO_TypeDef * GPIOx;
-	uint32_t pin;
+	uint32_t ccr;
+	int16_t step;
+	uint16_t pwm_value;
 	xTimer_tt timer;
 	LED_MODE mode;
 	uint16_t frq;
