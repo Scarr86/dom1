@@ -26,6 +26,7 @@ typedef enum{
 	MOTOR_2,
 	MOTOR_3,
 	MOTOR_4,
+	MOTOR_5,
 	MOTOR_COUNT
 }MOTOR_ENUM;
 
@@ -53,7 +54,7 @@ void dom_btn_set(uint8_t id, int16_t debounceTime);
 int8_t dom_btn_state_by_id(uint8_t id);
 int16_t dom_btn_debounce_time_by_id(uint8_t id);
 uint8_t dom_btn_subscribe(btn_observers_fn obs);
-uint8_t dom_btn_notify(uint8_t id);
+uint8_t dom_btn_notify(uint8_t indx);
 void dom_btn_1_on_click();
 void dom_btn_2_on_click();
 void dom_btn_3_on_click();
@@ -73,7 +74,7 @@ uint16_t dom_led_frq();
 
 // SENSOR START
 uint8_t dom_sensor_subscribe(sensor_observers_fn obs);
-uint8_t dom_sensor_notify(uint8_t id);
+uint8_t dom_sensor_notify(uint8_t indx);
 int8_t dom_sensor_state_by_id(uint8_t id);
 void dom_sensor_1_on_detected();
 void dom_sensor_2_on_detected();

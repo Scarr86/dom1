@@ -22,6 +22,8 @@ void cli_cmd_parser(uint8_t * cmd);
 
 void cli_btn_on_click(uint8_t id);
 
+void cli_sensor_on_detected(uint8_t id);
+
 
 
 
