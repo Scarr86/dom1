@@ -16,25 +16,21 @@ xButton_tt btn[] = {
 		{
 			.GPIOx = GPIOD,
 			.pin =  GPIO_PIN_0,
-			.debounceTime = 100,
 			.on_click = dom_btn_1_on_click,
 		},
 		{
 			.GPIOx = GPIOD,
 			.pin =  GPIO_PIN_1,
-			.debounceTime = 100,
 			.on_click = dom_btn_2_on_click,
 		},
 		{
 			.GPIOx = GPIOD,
 			.pin =  GPIO_PIN_2,
-			.debounceTime = 100,
 			.on_click = dom_btn_3_on_click,
 		},
 		{
 			.GPIOx = GPIOD,
 			.pin =  GPIO_PIN_3,
-			.debounceTime = 100,
 			.on_click = dom_btn_4_on_click,
 		}
 };
@@ -43,54 +39,46 @@ xSensor_tt sensor[] ={
 		{
 				.GPIOx = GPIOD,
 				.pin = GPIO_PIN_10,
-				.cmp_val = 1,
 				.on_detected = dom_sensor_1_on_detected
 		},
 		{
 				.GPIOx = GPIOD,
 				.pin = GPIO_PIN_11,
-				.cmp_val = 1,
 				.on_detected = dom_sensor_2_on_detected
 		},
 		{
 				.GPIOx = GPIOD,
 				.pin = GPIO_PIN_12,
-				.cmp_val = 1,
+				.cmpVal = 1,
 				.on_detected = dom_sensor_3_on_detected
 		},
 		{
 				.GPIOx = GPIOD,
 				.pin = GPIO_PIN_13,
-				.cmp_val = 1,
 				.on_detected = dom_sensor_4_on_detected
 		},
 		{
 				.GPIOx = GPIOD,
 				.pin = GPIO_PIN_14,
-				.cmp_val = 1,
 				.on_detected = dom_sensor_5_on_detected
 		},
 		{
 				.GPIOx = GPIOD,
 				.pin = GPIO_PIN_15,
-				.cmp_val = 1,
 				.on_detected = dom_sensor_6_on_detected
 		},
 		{
 				.GPIOx = GPIOG,
 				.pin = GPIO_PIN_2,
-				.cmp_val = 1,
 				.on_detected = dom_sensor_7_on_detected
 		},
 		{
 				.GPIOx = GPIOG,
 				.pin = GPIO_PIN_3,
-				.cmp_val = 1,
 				.on_detected = dom_sensor_8_on_detected
 		},
 
 };
-//(uint32_t)&TIM1->CCR2,
 
 xMotor_tt motor[]={
 		{
@@ -101,6 +89,7 @@ xMotor_tt motor[]={
 		{
 				.GPIOx = GPIOG,
 				.pin = GPIO_PIN_0,
+				.speed = 250,
 				.ccr = (uint32_t)&TIM3->CCR2,
 		},
 		{
@@ -120,6 +109,10 @@ xMotor_tt motor[]={
 		},
 };
 
+xDom_settings_tt dom_settings;
+
+
+
 uint8_t btn_observers_count;
 btn_observers_fn btn_observers[4];
 
@@ -131,17 +124,31 @@ sensor_observers_fn sensor_observers[4];
 
 void dom_init(){
 
+	if(! settings_read(&dom_settings)){
+		for(uint16_t i = 0; i < BUTTON_COUNT; ++i){
+			dom_settings.btn_settings[i].debounceTime = BUTTON_DEBOUNCE_TIME_DEF;
+		}
+		for(uint16_t i = 0; i < SENSOR_COUNT; ++i){
+			dom_settings.sensor_settings[i].cmpVal = SENSOR_CMP_VAL_DEF;
+		}
+		for(uint16_t i = 0; i < MOTOR_COUNT; ++i){
+			dom_settings.motor_settings[i].speed = MOTOR_SPEED_DEF;
+		}
+	}
 	for(uint16_t i = 0; i < BUTTON_COUNT; ++i){
 		btn_init(&btn[i]);
+		btn_set(&btn[i], dom_settings.btn_settings[i].debounceTime);
 	}
 	for(uint16_t i = 0; i < SENSOR_COUNT; ++i){
 		sensor_init(&sensor[i]);
+		sensor_set(&sensor[i], dom_settings.sensor_settings[i].cmpVal);
 	}
 	for(uint16_t i = 0; i < MOTOR_COUNT; ++i){
 		motor_init(&motor[i]);
+		motor_set(&motor[i], dom_settings.motor_settings[i].speed);
 	}
-	motor_forward(&motor[MOTOR_5]);
 	led_on(&led);
+	motor_forward(&motor[MOTOR_5]);
 	//led_blink(&led, 4);
 }
 void dom_poll(){
@@ -153,13 +160,42 @@ void dom_poll(){
 	}
 }
 
+uint16_t settings_write(xDom_settings_tt * ds){
+	uint8_t data[sizeof(xDom_settings_tt) + 2];
+	memcpy(data, ds, sizeof(xDom_settings_tt));
+	uint16_t iks1 = sizeof data - 2;
+	uint16_t iks2 = sizeof data - 1;
+	ks16(ds, sizeof(xDom_settings_tt), &data[iks1], &data[iks2]);
+
+	return flash_write((void *) data, sizeof data);
+}
+uint8_t settings_read(xDom_settings_tt * ds){
+	uint8_t data[sizeof(xDom_settings_tt) + 2];
+
+	flash_read((void *)data, sizeof data);
+	if(ks16_check(data, sizeof data)){
+		memcpy(ds, data, sizeof(xDom_settings_tt));
+		return 1;
+	}
+	return 0;
+}
 
 // BUTTON FUNCTION START
-void dom_btn_set(uint8_t id, int16_t debounceTime){
-	if(id == 0 || id > BUTTON_COUNT || debounceTime == 0){
-		return;
+int8_t dom_btn_set(uint8_t id, int16_t debounceTime){
+	if(id == 0 || id > BUTTON_COUNT){
+		return 1;
 	}
+	if(debounceTime == 0){
+		return 0;
+	}
+
+	dom_settings.btn_settings[id - 1].debounceTime = debounceTime;
 	btn_set(&btn[id - 1], debounceTime);
+	if(!settings_write(&dom_settings)){
+		return 0;
+	}
+
+	return 1;
 }
 int8_t dom_btn_state_by_id(uint8_t id){
 	if(id == 0 || id > BUTTON_COUNT){
@@ -228,6 +264,17 @@ uint16_t dom_led_frq(){
 // LED FUNCTION END
 
 // SENSOR FUNCTION START
+uint8_t dom_sensor_set(uint8_t id, uint8_t cmpVal){
+	if(id == 0 || id > SENSOR_COUNT){
+		return 1;
+	}
+	dom_settings.sensor_settings[id - 1].cmpVal = !!cmpVal;
+	sensor_set(&sensor[id - 1], !!cmpVal);
+	if(!settings_write(&dom_settings)){
+		return 0;
+	}
+	return 1;
+}
 uint8_t dom_sensor_subscribe(sensor_observers_fn obs){
 	if(sensor_observers_count < 4){
 		sensor_observers[sensor_observers_count] = obs;
@@ -246,6 +293,13 @@ int8_t dom_sensor_state_by_id(uint8_t id){
 	if(id == 0 || id > SENSOR_COUNT)
 		return  -1;
 	return sensor_state(&sensor[id - 1]);
+}
+
+int8_t dom_sensor_cmp_val_by_id(uint8_t id){
+	if(id == 0 || id > SENSOR_COUNT){
+		 return - 1;
+	}
+	return sensor_cmp_val(&sensor[id - 1]);
 }
 void dom_sensor_1_on_detected(){
 	dom_sensor_notify(SENSOR_1);
@@ -290,10 +344,19 @@ int8_t dom_motor_dir(uint8_t id){
 		return -1;
 	return motor_dir(&motor[id-1]);
 }
-void dom_motor_set(uint8_t id, uint16_t speed){
-	if(id == 0 || id > MOTOR_COUNT || speed == 0 || speed > MOTOR_SPEED_MAX)
-		return;
+uint8_t dom_motor_set(uint8_t id, uint16_t speed){
+	if(id == 0 || id > MOTOR_COUNT || speed > MOTOR_SPEED_MAX){
+		return 1;
+	}
+	if(speed == 0){
+		return 0;
+	}
+	dom_settings.motor_settings[id - 1].speed = speed;
 	motor_set(&motor[id-1], speed);
+	if(!settings_write(&dom_settings)){
+		return 0;
+	}
+	return 1;
 }
 void dom_motor_forward(uint8_t id){
 	if(id == 0 || id > MOTOR_COUNT)

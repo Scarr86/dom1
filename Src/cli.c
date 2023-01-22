@@ -25,6 +25,9 @@ const char * help = "\r\n/h - help\r\n"
 		"/b id option [debounceTime, ...] - settings button\r\n"
 		"option:\r\n"
 		"\t '=' - set [debounceTime, ...]\r\n"
+		"/s id option [cmpVal, ...] - settings sensor\r\n"
+		"option:\r\n"
+		"\t '=' - set [cmpVal, ...]\r\n"
 		"/l option [frq,...] - setting and control led\r\n"
 		"option:\r\n"
 		"\t '+' - led on\r\n"
@@ -86,6 +89,7 @@ void cli_cmd_parser(uint8_t * cmd){
 	uint16_t slen;
 	uint8_t tbuf[80];
 	uint8_t id;
+	uint8_t result;
 
 	char * p = strtok(cmd, sep);
 	if(strlen(p) > 1){
@@ -138,7 +142,10 @@ void cli_cmd_parser(uint8_t * cmd){
 						return;
 					}
 					slen = sprintf(cbuf, "\r\nSENSOR %d\r\n"
-													"state: %d", atoi(p), dom_sensor_state_by_id(atoi(p)));
+													"state: %d\r\n"
+													"cmpVal: %d", atoi(p),
+													dom_sensor_state_by_id(atoi(p)),
+													dom_sensor_cmp_val_by_id(atoi(p)));
 					sender(cbuf, slen);
 				break;
 				case 'm':
@@ -166,7 +173,7 @@ void cli_cmd_parser(uint8_t * cmd){
 		break;
 		case 'b':
 			p = strtok(NULL, sep);// read id
-			uint8_t id = atoi(p);
+			id = atoi(p);
 			p = strtok(NULL, sep);// read option
 			if(p == NULL || id == 0){
 				slen = sprintf(cbuf, "\r\nincorrect command");
@@ -192,11 +199,13 @@ void cli_cmd_parser(uint8_t * cmd){
 				case '~':
 					p = strtok(NULL, sep);
 					if(p == NULL){
-						dom_led_set(0, LED_BLINK_ON, 0);
+						result = dom_led_set(0, LED_BLINK_ON, 0);
 					}
 					else{
-						dom_led_set(0, LED_BLINK_ON, atoi(p));
+						result = dom_led_set(0, LED_BLINK_ON, atoi(p));
 					}
+					slen = sprintf(cbuf, "\n%s", result > 0 ? "fail" : "done");
+					sender(cbuf, slen);
 				break;
 				default:
 					slen = sprintf(cbuf, "\r\nincorrect command");
@@ -232,12 +241,41 @@ void cli_cmd_parser(uint8_t * cmd){
 				case '=':
 					p = strtok(NULL, sep);
 					if(p == NULL){
-						dom_motor_set(id, 0);
+						result = dom_motor_set(id, 0);
 					}
-					dom_motor_set(id, atoi(p));
+					else{
+						result = dom_motor_set(id, atoi(p));
+					}
+					slen = sprintf(cbuf, "\n%s", result > 0 ? "fail" : "done");
+					sender(cbuf, slen);
 				break;
 				default:
 					slen = sprintf(cbuf, "\r\nincorrect command");
+					sender(cbuf, slen);
+				break;
+			}
+
+		break;
+
+		case 's':
+			p = strtok(NULL, sep);// read id
+			id = atoi(p);
+			p = strtok(NULL, sep);// read option
+			if(p == NULL || id == 0){
+				slen = sprintf(cbuf, "\r\nincorrect command");
+				sender(cbuf, slen);
+				return;
+			}
+			switch(*p){
+				case '=':
+					p = strtok(NULL, sep);
+					if(p == NULL){
+						result = dom_sensor_set(id, 0);
+					}
+					else{
+						result = dom_sensor_set(id, atoi(p));
+					}
+					slen = sprintf(cbuf, "\n%s", result > 0 ? "fail" : "done");
 					sender(cbuf, slen);
 				break;
 			}
@@ -253,7 +291,7 @@ void cli_cmd_parser(uint8_t * cmd){
 
 void parser_btn(uint8_t id, uint8_t * p){
 	//char * p = strtok(cmd, sep);
-	uint16_t slen;
+	uint16_t slen, result;
 	if(id == 0){
 		slen = sprintf(cbuf, "\r\nincorrect command");
 		sender(cbuf, slen);
@@ -270,10 +308,13 @@ void parser_btn(uint8_t id, uint8_t * p){
 		case '=':
 			p = strtok(NULL, sep);
 			if(p == NULL){
-				dom_btn_set(id, 0);
-				return;
+				result = dom_btn_set(id, 0);
 			}
-			dom_btn_set(id, atoi(p));
+			else{
+				result =dom_btn_set(id, atoi(p));
+			}
+			slen = sprintf(cbuf, "\n%s", result > 0 ? "fail" : "done");
+			sender(cbuf, slen);
 		break;
 		default:
 			slen = sprintf(cbuf, "\r\nincorrect command");

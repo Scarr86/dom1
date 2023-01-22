@@ -9,8 +9,6 @@
 
 void motor_init(xMotor_tt * m){
 	motor_stop(m);
-	//TODO need read speed of flash
-	motor_set(m, 250);
 }
 void motor_stop(xMotor_tt * m){
 	m->state = MOTOR_STATE_STOP;
