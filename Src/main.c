@@ -105,15 +105,15 @@ int main(void)
   MX_TIM1_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
-//  uint8_t data[11]= {'1','2','3','4','5','6','7','8','9'};
-//  ks16(data, sizeof data - 2 , &data[9], &data[10]);
-//  uint8_t chk = ks16_check(data, sizeof data);
-//  uint8_t rdata[4];
-//  flash_write(data, sizeof data);
-//  flash_read(rdata, 4);
-
 
   HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
+
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
+
+  HAL_TIM_PWM_Start(&htim12, TIM_CHANNEL_2);
 
   cli_init(usb_send);
   usb_subscribe(cli_parser);
