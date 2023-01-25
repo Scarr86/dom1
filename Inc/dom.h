@@ -48,6 +48,9 @@ typedef enum{
 	SENSOR_COUNT
 }SENSOR_ENUM;
 
+
+
+
 typedef struct{
 	xButton_settings_tt btn_settings[BUTTON_COUNT];
 	xSensor_settings_tt sensor_settings[SENSOR_COUNT];
@@ -61,6 +64,10 @@ void dom_init();
 void dom_poll();
 uint16_t settings_write(xDom_settings_tt * ds);
 uint8_t settings_read(xDom_settings_tt * ds);
+
+xButton_tt * get_button(BUTTON_ENUM id);
+xSensor_tt * get_sensor(SENSOR_ENUM id);
+xMotor_tt * get_motor(MOTOR_ENUM id);
 
 
 

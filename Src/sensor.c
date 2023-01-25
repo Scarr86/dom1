@@ -28,3 +28,7 @@ uint8_t sensor_cmp_val(xSensor_tt * s){
 	return s->cmpVal;
 }
 
+uint8_t sensor_is_detected(xSensor_tt * s){
+	return s->state == s->cmpVal;
+}
+

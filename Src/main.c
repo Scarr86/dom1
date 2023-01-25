@@ -25,6 +25,7 @@
 #include "usbd_cdc_if.h"
 #include "cli.h"
 #include "dom.h"
+#include "gate.h"
 #include "timer.h"
 #include "settings.h"
 #include "fletcher.h"
@@ -115,9 +116,11 @@ int main(void)
 
   HAL_TIM_PWM_Start(&htim12, TIM_CHANNEL_2);
 
-  cli_init(usb_send);
   usb_subscribe(cli_parser);
+  cli_init(usb_send);
   dom_init();
+  gate_init();
+
 
 
   /* USER CODE END 2 */

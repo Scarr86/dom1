@@ -6,6 +6,15 @@
  */
 #include "cli.h"
 
+
+static void cli_cmd_parser(uint8_t * cmd);
+
+static void cli_btn_on_click(uint8_t id);
+
+static void cli_sensor_on_detected(uint8_t id);
+
+static void cli_gate_change(GATE_ENUM id);
+
 const char * sep = " ,";
 
 const char * help = "\r\n/h - help\r\n"
@@ -16,6 +25,7 @@ const char * help = "\r\n/h - help\r\n"
 		"\t 's' - state all or [id] sensor\r\n"
 		"\t 'o' - state all or [id] odometer\r\n"
 		"\t 'l' - state led\r\n"
+		"\t 'g' - state gate all or [id]\r\n"
 		"/m id option [speed, ...] - settings and control motor\r\n"
 		"option:\r\n"
 		"\t '=' - set [speed, ...]\r\n"
@@ -35,6 +45,7 @@ const char * help = "\r\n/h - help\r\n"
 		"\t '~' - led blink mode [frq, ...]";
 #define CLI_BUF_SIZE (1000)
 char cbuf[CLI_BUF_SIZE];
+uint8_t tbuf[80];
 uint16_t cbuf_len;
 uint8_t cbuf_owf;
 
@@ -54,6 +65,8 @@ void cli_init(cli_sender_tt cli_sender){
 	cbuf_owf = 0;
 
 	dom_btn_subscribe(cli_btn_on_click);
+	dom_sensor_subscribe(cli_sensor_on_detected);
+	gate_subscribe(cli_gate_change);
 }
 
 void cli_parser(uint8_t * buf, uint16_t len){
@@ -87,7 +100,7 @@ void cli_parser(uint8_t * buf, uint16_t len){
 
 void cli_cmd_parser(uint8_t * cmd){
 	uint16_t slen;
-	uint8_t tbuf[80];
+
 	uint8_t id;
 	uint8_t result;
 
@@ -163,6 +176,26 @@ void cli_cmd_parser(uint8_t * cmd){
 							"speed: %d\r\n"
 							"dir: %d", id, dom_motor_state(id), dom_motor_speed(id), dom_motor_dir(id));
 					sender(cbuf, slen);
+				break;
+				case 'g':
+					p = strtok(NULL, sep);
+					if(p == NULL){
+						for(uint8_t i = 0; i < GATE_COUNT; ++i){
+							sprintf(tbuf, "? g %d\0", i+1);
+							cli_cmd_parser(tbuf);
+						}
+						return;
+					}
+					id = atoi(p);
+					if(id == 0 || id > GATE_COUNT){
+						slen = sprintf(cbuf, "\r\nincorrect command");
+					}
+					else{
+						slen = sprintf(cbuf, "GATE %d\r\n"
+								"state: %s",id, get_gate(id - 1)->state == GATE_STATE_STOP ? "STOP":
+										get_gate(id - 1)->state == GATE_STATE_ClOSING ? "ClOSING" : "OPENING" );
+						sender(cbuf, slen);
+					}
 				break;
 				default:
 					slen = sprintf(cbuf, "\r\nincorrect command");
@@ -323,15 +356,19 @@ void parser_btn(uint8_t id, uint8_t * p){
 	}
 
 }
+
 void cli_btn_on_click(uint8_t id){
-	parser_btn(id, NULL);
+	parser_btn(id+1, NULL);
 	sender("\r\n", 2);
 }
 
 void cli_sensor_on_detected(uint8_t id){
-	sprintf(cbuf, "/? s %d\0", id);
-	sender("\r\n", 2);
+	sprintf(tbuf, "/? s %d\r", id+1);
+	cli_parser(tbuf, strlen(tbuf));
 }
 
-
+static void cli_gate_change(GATE_ENUM id){
+	sprintf(tbuf, "/? g %d\r", id+1);
+	cli_parser(tbuf, strlen(tbuf));
+}
 

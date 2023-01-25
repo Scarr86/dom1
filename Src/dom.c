@@ -112,7 +112,6 @@ xMotor_tt motor[]={
 xDom_settings_tt dom_settings;
 
 
-
 uint8_t btn_observers_count;
 btn_observers_fn btn_observers[4];
 
@@ -180,6 +179,17 @@ uint8_t settings_read(xDom_settings_tt * ds){
 	return 0;
 }
 
+
+xButton_tt * get_button(BUTTON_ENUM id){
+	return &btn[id];
+}
+xSensor_tt * get_sensor(SENSOR_ENUM id){
+	return &sensor[id];
+}
+xMotor_tt * get_motor(MOTOR_ENUM id){
+	return &motor[id];
+}
+
 // BUTTON FUNCTION START
 int8_t dom_btn_set(uint8_t id, int16_t debounceTime){
 	if(id == 0 || id > BUTTON_COUNT){
@@ -194,7 +204,6 @@ int8_t dom_btn_set(uint8_t id, int16_t debounceTime){
 	if(!settings_write(&dom_settings)){
 		return 0;
 	}
-
 	return 1;
 }
 int8_t dom_btn_state_by_id(uint8_t id){
@@ -219,7 +228,7 @@ uint8_t dom_btn_subscribe(btn_observers_fn obs){
 }
 uint8_t dom_btn_notify(uint8_t indx){
 	for(uint16_t i = 0; i < btn_observers_count; ++i){
-		btn_observers[i](indx + 1);
+		btn_observers[i](indx);
 	}
 	return 0;
 }
@@ -285,7 +294,7 @@ uint8_t dom_sensor_subscribe(sensor_observers_fn obs){
 }
 uint8_t dom_sensor_notify(uint8_t indx){
 	for(uint16_t i = 0; i < sensor_observers_count; ++i){
-		sensor_observers[i](indx + 1);
+		sensor_observers[i](indx);
 	}
 	return 0;
 }
@@ -294,7 +303,6 @@ int8_t dom_sensor_state_by_id(uint8_t id){
 		return  -1;
 	return sensor_state(&sensor[id - 1]);
 }
-
 int8_t dom_sensor_cmp_val_by_id(uint8_t id){
 	if(id == 0 || id > SENSOR_COUNT){
 		 return - 1;

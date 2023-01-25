@@ -11,22 +11,13 @@
 #include "stdint.h"
 #include "string.h"
 #include "dom.h"
+#include "gate.h"
 
 
 typedef uint8_t (*cli_sender_tt)(uint8_t*, uint16_t);
 
 void cli_init(cli_sender_tt cli_sender);
-
 void cli_parser(uint8_t * buf, uint16_t len);
-void cli_cmd_parser(uint8_t * cmd);
-
-void cli_btn_on_click(uint8_t id);
-
-void cli_sensor_on_detected(uint8_t id);
-
-
-
-
 
 
 
