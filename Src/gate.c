@@ -7,13 +7,32 @@
 #include "gate.h"
 static void on_ckick_button(uint8_t id);
 static void on_sensor_detected(uint8_t id);
-static void gate_sensors_motor_1_detected(xGate_tt * g);
-static void gate_sensors_motor_2_detected(xGate_tt * g);
 
 
+/*
+ * купол состоит из 2х ворот, каждые ворота состоят из 2х створок
+ * ниже фукции для открытия, закрыти, остоновки ворот и
+ * остановки створок, соответственно
+ */
+
+// закрыть ворота (передается указатель на ворота)
 static void gate_close(xGate_tt * gate);
-static void gate_stop(xGate_tt * gate);
+// открыть ворота (параметры указатель на ворота)
 static void gate_open(xGate_tt * gate);
+// остановить ворота (параметры указатель на ворота)
+static void gate_stop(xGate_tt * gate);
+
+// остановка створки по умолчанию
+static void gate_def_leaf_stop();
+// остановить 1ю створку(нижняя) (в параметрах указатель на ворота)
+static void gate_leaf_1_stop(xGate_tt * g);
+// остановить 2ю створку(верхняя)(в параметрах указатель на ворота)
+static void gate_leaf_2_stop(xGate_tt * g);
+
+
+
+
+
 static void gate_change(GATE_ENUM id, GATE_STATE_ENUM new_state);
 static void gate_notify(GATE_ENUM id);
 
@@ -35,16 +54,36 @@ xGate_tt gates[]={
 
 
 
-
+// описывает 3 состояния для обработки по нажатию кнопок и срабатыванию датчиков
 xGate_state_tt gate_states[] = {
+		// stop
 		{
 				.on_click_close = gate_close,
 				.on_click_open = gate_open,
+				.on_detected_1 = gate_def_leaf_stop,
+				.on_detected_2 = gate_def_leaf_stop,
+				.on_detected_3 = gate_def_leaf_stop,
+				.on_detected_4 = gate_def_leaf_stop,
 		},
+		// closing
 		{
 				.on_click_close = gate_stop,
 				.on_click_open = gate_stop,
-		}
+				.on_detected_1 = gate_leaf_1_stop,
+				.on_detected_2 = gate_def_leaf_stop,
+				.on_detected_3 = gate_leaf_2_stop,
+				.on_detected_4 = gate_def_leaf_stop,
+		},
+		// opening
+		{
+				.on_click_close = gate_stop,
+				.on_click_open = gate_stop,
+				.on_detected_1 = gate_def_leaf_stop ,
+				.on_detected_2 = gate_leaf_1_stop,
+				.on_detected_3 = gate_def_leaf_stop,
+				.on_detected_4 = gate_leaf_2_stop,
+		},
+
 };
 
 
@@ -94,7 +133,7 @@ void gate_close(xGate_tt * g){
 
 void gate_open(xGate_tt * g){
 	xSensor_tt * s1 = get_sensor(g->sid[1]);
-	xSensor_tt * s2 = get_sensor(g->sid[4]);
+	xSensor_tt * s2 = get_sensor(g->sid[3]);
 	xMotor_tt * m1 = get_motor(g->mid[0]);
 	xMotor_tt * m2 = get_motor(g->mid[1]);
 	if(!sensor_is_detected(s1)){
@@ -119,28 +158,30 @@ void gate_change(GATE_ENUM id, GATE_STATE_ENUM new_state){
 	gate_notify(id);
 }
 
-void gate_sensors_motor_1_detected(xGate_tt * g){
 
+
+void gate_def_leaf_stop(){
+
+}
+
+void gate_leaf_1_stop(xGate_tt * g){
 	xMotor_tt * m1 = get_motor(g->mid[0]);
 	xMotor_tt * m2 = get_motor(g->mid[1]);
-
 	motor_stop(m1);
-
 	if(motor_state(m2) == MOTOR_STATE_STOP){
 		gate_change(g->id, GATE_STATE_STOP);
 	}
 }
-void gate_sensors_motor_2_detected(xGate_tt * g){
 
+void gate_leaf_2_stop(xGate_tt * g){
 	xMotor_tt * m1 = get_motor(g->mid[0]);
 	xMotor_tt * m2 = get_motor(g->mid[1]);
-
 	motor_stop(m2);
-
 	if(motor_state(m1) == MOTOR_STATE_STOP){
 		gate_change(g->id, GATE_STATE_STOP);
 	}
 }
+
 
 void on_ckick_button(uint8_t id){
 
@@ -163,23 +204,34 @@ void on_ckick_button(uint8_t id){
 	}
 }
 
+/* датчик с 1-4 - ворота 1
+ * датчик с 5-8 - ворота 2
+ */
 void on_sensor_detected(uint8_t id){
 	switch(id){
 		case SENSOR_1:
+			gate_states[gates[GATE_1].state].on_detected_1(&gates[GATE_1]);
 		case SENSOR_2:
-			gate_sensors_motor_1_detected(&gates[GATE_1]);
+			gate_states[gates[GATE_1].state].on_detected_2(&gates[GATE_1]);
+//			gate_sensors_motor_1_detected(&gates[GATE_1]);
 		break;
 		case SENSOR_3:
+			gate_states[gates[GATE_1].state].on_detected_3(&gates[GATE_1]);
 		case SENSOR_4:
-			gate_sensors_motor_2_detected(&gates[GATE_1]);
+			gate_states[gates[GATE_1].state].on_detected_4(&gates[GATE_1]);
+			//gate_sensors_motor_2_detected(&gates[GATE_1]);
 		break;
 		case SENSOR_5:
+			gate_states[gates[GATE_2].state].on_detected_1(&gates[GATE_2]);
 		case SENSOR_6:
-			gate_sensors_motor_1_detected(&gates[GATE_2]);
+			gate_states[gates[GATE_2].state].on_detected_2(&gates[GATE_2]);
+//			gate_sensors_motor_1_detected(&gates[GATE_2]);
 		break;
 		case SENSOR_7:
+			gate_states[gates[GATE_2].state].on_detected_3(&gates[GATE_2]);
 		case SENSOR_8:
-			gate_sensors_motor_2_detected(&gates[GATE_2]);
+			gate_states[gates[GATE_2].state].on_detected_4(&gates[GATE_2]);
+//			gate_sensors_motor_2_detected(&gates[GATE_2]);
 		break;
 		default:
 		break;

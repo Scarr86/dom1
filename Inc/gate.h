@@ -32,6 +32,11 @@ typedef struct{
 typedef struct{
 	void (*on_click_open)(xGate_tt * gate);
 	void (*on_click_close)(xGate_tt * gate);
+	void (*on_detected_1)(xGate_tt * gate);
+	void (*on_detected_2)(xGate_tt * gate);
+	void (*on_detected_3)(xGate_tt * gate);
+	void (*on_detected_4)(xGate_tt * gate);
+
 }xGate_state_tt;
 
 

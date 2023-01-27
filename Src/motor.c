@@ -7,7 +7,8 @@
 
 #include "motor.h"
 
-void motor_init(xMotor_tt * m){
+void motor_init(xMotor_tt * m, uint8_t id){
+	m->id = id;
 	motor_stop(m);
 }
 void motor_stop(xMotor_tt * m){

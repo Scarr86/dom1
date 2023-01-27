@@ -18,6 +18,7 @@ typedef enum{
 }MOTOR_STATE_ENUM;
 
 typedef struct{
+	uint8_t id;
 	GPIO_TypeDef * GPIOx;
 	uint32_t pin;
 	uint32_t ccr;
@@ -26,7 +27,7 @@ typedef struct{
 }xMotor_tt;
 
 
-void motor_init(xMotor_tt * m);
+void motor_init(xMotor_tt * m, uint8_t id);
 void motor_stop(xMotor_tt * m);
 void motor_forward(xMotor_tt * m);
 void motor_back(xMotor_tt * m);

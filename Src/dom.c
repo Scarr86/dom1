@@ -89,7 +89,6 @@ xMotor_tt motor[]={
 		{
 				.GPIOx = GPIOG,
 				.pin = GPIO_PIN_0,
-				.speed = 250,
 				.ccr = (uint32_t)&TIM3->CCR2,
 		},
 		{
@@ -143,7 +142,7 @@ void dom_init(){
 		sensor_set(&sensor[i], dom_settings.sensor_settings[i].cmpVal);
 	}
 	for(uint16_t i = 0; i < MOTOR_COUNT; ++i){
-		motor_init(&motor[i]);
+		motor_init(&motor[i], i);
 		motor_set(&motor[i], dom_settings.motor_settings[i].speed);
 	}
 	led_on(&led);
