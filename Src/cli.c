@@ -119,13 +119,13 @@ void cli_cmd_parser(uint8_t * cmd){
 		case '?':
 			p = strtok(NULL, sep);
 			if(p == NULL){
-				sprintf(tbuf, "? b\0");
+				sprintf(tbuf, "? b");
 				cli_cmd_parser(tbuf);
-				sprintf(tbuf, "? s\0");
+				sprintf(tbuf, "? s");
 				cli_cmd_parser(tbuf);
-				sprintf(tbuf, "? m\0");
+				sprintf(tbuf, "? m");
 				cli_cmd_parser(tbuf);
-				sprintf(tbuf, "? l\0");
+				sprintf(tbuf, "? l");
 				cli_cmd_parser(tbuf);
 				return;
 			}
@@ -151,7 +151,7 @@ void cli_cmd_parser(uint8_t * cmd){
 					p = strtok(NULL, sep);
 					if(p ==  NULL){
 						for(uint8_t i = 0; i < SENSOR_COUNT; ++i){
-							sprintf(tbuf, "? s %d\0", i+1);
+							sprintf(tbuf, "? s %d", i+1);
 							cli_cmd_parser(tbuf);
 						}
 						return;
@@ -159,15 +159,15 @@ void cli_cmd_parser(uint8_t * cmd){
 					slen = sprintf(cbuf, "\r\nSENSOR %d\r\n"
 													"state: %d\r\n"
 													"cmpVal: %d", atoi(p),
-													dom_sensor_state_by_id(atoi(p)),
-													dom_sensor_cmp_val_by_id(atoi(p)));
+													dom_sensor_state(atoi(p)),
+													dom_sensor_cmp_val(atoi(p)));
 					sender(cbuf, slen);
 				break;
 				case 'm':
 					p = strtok(NULL, sep);
 					if(p == NULL){
 						for(uint8_t i = 0; i < MOTOR_COUNT; ++i){
-							sprintf(tbuf, "? m %d\0", i+1);
+							sprintf(tbuf, "? m %d", i+1);
 							cli_cmd_parser(tbuf);
 						}
 						return;
@@ -183,7 +183,7 @@ void cli_cmd_parser(uint8_t * cmd){
 					p = strtok(NULL, sep);
 					if(p == NULL){
 						for(uint8_t i = 0; i < GATE_COUNT; ++i){
-							sprintf(tbuf, "? g %d\0", i+1);
+							sprintf(tbuf, "? g %d", i+1);
 							cli_cmd_parser(tbuf);
 						}
 						return;
@@ -191,11 +191,32 @@ void cli_cmd_parser(uint8_t * cmd){
 					id = atoi(p);
 					if(id == 0 || id > GATE_COUNT){
 						slen = sprintf(cbuf, "\r\nincorrect command");
+						sender(cbuf, slen);
 					}
 					else{
-						slen = sprintf(cbuf, "GATE %d\r\n"
+						slen = sprintf(cbuf, "\r\nGATE %d\r\n"
 								"state: %s",id, get_gate(id - 1)->state == GATE_STATE_STOP ? "STOP":
 										get_gate(id - 1)->state == GATE_STATE_ClOSING ? "ClOSING" : "OPENING" );
+						sender(cbuf, slen);
+					}
+				break;
+				case 'o':
+					p = strtok(NULL, sep);
+					if(p == NULL){
+						for(uint8_t i = 0; i < ODOMETER_COUNT; ++i){
+							sprintf(tbuf, "? o %d", i+1);
+							cli_cmd_parser(tbuf);
+						}
+						return;
+					}
+					id = atoi(p);
+					if(id == 0 || id > ODOMETER_COUNT){
+						slen = sprintf(cbuf, "\r\nincorrect command");
+						sender(cbuf, slen);
+					}
+					else{
+						slen = sprintf(cbuf, "\r\nODOMETER %d\r\n"
+								"value: %lu", id, dom_odometer_value(id - 1) );
 						sender(cbuf, slen);
 					}
 				break;
@@ -335,7 +356,7 @@ void parser_btn(uint8_t id, uint8_t * p){
 	if(p == NULL){
 		slen = sprintf(cbuf, "\r\nBUTTON %d"
 				"\r\nstate: %d"
-				"\r\ndebounceTime: %d", id, dom_btn_state_by_id(id), dom_btn_debounce_time_by_id(id));
+				"\r\ndebounceTime: %d", id, dom_btn_state(id), dom_btn_debounce_time(id));
 		sender(cbuf, slen);
 		return;
 	}

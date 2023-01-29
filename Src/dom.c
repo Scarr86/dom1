@@ -108,7 +108,10 @@ xMotor_tt motor[]={
 		},
 };
 
+xOdometer_tt odometer[4];
+
 xDom_settings_tt dom_settings;
+uint8_t settings_is_valid;
 
 
 uint8_t btn_observers_count;
@@ -122,28 +125,19 @@ sensor_observers_fn sensor_observers[4];
 
 void dom_init(){
 
-	if(! settings_read(&dom_settings)){
-		for(uint16_t i = 0; i < BUTTON_COUNT; ++i){
-			dom_settings.btn_settings[i].debounceTime = BUTTON_DEBOUNCE_TIME_DEF;
-		}
-		for(uint16_t i = 0; i < SENSOR_COUNT; ++i){
-			dom_settings.sensor_settings[i].cmpVal = SENSOR_CMP_VAL_DEF;
-		}
-		for(uint16_t i = 0; i < MOTOR_COUNT; ++i){
-			dom_settings.motor_settings[i].speed = MOTOR_SPEED_DEF;
-		}
-	}
+	settings_is_valid  = settings_read(&dom_settings);
+
 	for(uint16_t i = 0; i < BUTTON_COUNT; ++i){
 		btn_init(&btn[i]);
-		btn_set(&btn[i], dom_settings.btn_settings[i].debounceTime);
+		btn_set(&btn[i], settings_is_valid ? dom_settings.btn_settings[i].debounceTime : BUTTON_DEBOUNCE_TIME_DEF);
 	}
 	for(uint16_t i = 0; i < SENSOR_COUNT; ++i){
 		sensor_init(&sensor[i]);
-		sensor_set(&sensor[i], dom_settings.sensor_settings[i].cmpVal);
+		sensor_set(&sensor[i], settings_is_valid ? dom_settings.sensor_settings[i].cmpVal: SENSOR_CMP_VAL_DEF);
 	}
 	for(uint16_t i = 0; i < MOTOR_COUNT; ++i){
 		motor_init(&motor[i], i);
-		motor_set(&motor[i], dom_settings.motor_settings[i].speed);
+		motor_set(&motor[i], settings_is_valid ? dom_settings.motor_settings[i].speed : MOTOR_SPEED_DEF);
 	}
 	led_on(&led);
 	motor_forward(&motor[MOTOR_5]);
@@ -155,6 +149,9 @@ void dom_poll(){
 	}
 	for(uint16_t i = 0; i < SENSOR_COUNT; ++i){
 		sensor_poll(&sensor[i]);
+	}
+	for(uint16_t i = 0; i < ODOMETER_COUNT; ++i){
+		odometer_poll(&odometer[i]);
 	}
 }
 
@@ -205,13 +202,13 @@ int8_t dom_btn_set(uint8_t id, int16_t debounceTime){
 	}
 	return 1;
 }
-int8_t dom_btn_state_by_id(uint8_t id){
+int8_t dom_btn_state(uint8_t id){
 	if(id == 0 || id > BUTTON_COUNT){
 		return  -1;
 	}
 	return btn_state(&btn[id - 1]);
 }
-int16_t dom_btn_debounce_time_by_id(uint8_t id){
+int16_t dom_btn_debounce_time(uint8_t id){
 	if(id == 0 || id > BUTTON_COUNT){
 		return -1;
 	}
@@ -297,12 +294,12 @@ uint8_t dom_sensor_notify(uint8_t indx){
 	}
 	return 0;
 }
-int8_t dom_sensor_state_by_id(uint8_t id){
+int8_t dom_sensor_state(uint8_t id){
 	if(id == 0 || id > SENSOR_COUNT)
 		return  -1;
 	return sensor_state(&sensor[id - 1]);
 }
-int8_t dom_sensor_cmp_val_by_id(uint8_t id){
+int8_t dom_sensor_cmp_val(uint8_t id){
 	if(id == 0 || id > SENSOR_COUNT){
 		 return - 1;
 	}
@@ -352,6 +349,8 @@ int8_t dom_motor_dir(uint8_t id){
 	return motor_dir(&motor[id-1]);
 }
 uint8_t dom_motor_set(uint8_t id, uint16_t speed){
+
+	// return 0 - no error, 1 -error
 	if(id == 0 || id > MOTOR_COUNT || speed > MOTOR_SPEED_MAX){
 		return 1;
 	}
@@ -381,6 +380,33 @@ void dom_motor_stop(uint8_t id){
 	motor_stop(&motor[id-1]);
 }
 // MOTOR FUNCTION END
+
+// ODOMETER START
+xOdometer_tt * dom_odometer(uint8_t id){
+	return &odometer[id];
+}
+uint32_t dom_odometer_value(uint8_t id){
+	return odometer[id].val;
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
+	switch(GPIO_Pin){
+		case GPIO_PIN_7:
+			odometer_add(&odometer[ODOMETER_1], 1);
+		break;
+		case GPIO_PIN_8:
+			odometer_add(&odometer[ODOMETER_2], 1);
+		break;
+		case GPIO_PIN_9:
+			odometer_add(&odometer[ODOMETER_3], 1);
+		break;
+		case GPIO_PIN_10:
+			odometer_add(&odometer[ODOMETER_4], 1);
+		break;
+		default: break;
+	}
+}
+// ODOMETER END
 
 
 

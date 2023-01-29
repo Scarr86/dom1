@@ -184,23 +184,12 @@ void gate_leaf_2_stop(xGate_tt * g){
 
 
 void on_ckick_button(uint8_t id){
-
-	// state reduce to 0 or 1
 	switch(id){
-		case BUTTON_1:
-			gate_states[gates[GATE_1].state].on_click_close(&gates[GATE_1]);
-		break;
-		case BUTTON_2:
-			gate_states[gates[GATE_1].state].on_click_open(&gates[GATE_1]);
-		break;
-		case BUTTON_3:
-			gate_states[gates[GATE_2].state].on_click_close(&gates[GATE_2]);
-		break;
-		case BUTTON_4:
-			gate_states[gates[GATE_2].state].on_click_open(&gates[GATE_2]);
-		break;
-		default:
-		break;
+		case BUTTON_1: gate_states[gates[GATE_1].state].on_click_close(&gates[GATE_1]); break;
+		case BUTTON_2: gate_states[gates[GATE_1].state].on_click_open(&gates[GATE_1]);  break;
+		case BUTTON_3: gate_states[gates[GATE_2].state].on_click_close(&gates[GATE_2]); break;
+		case BUTTON_4: gate_states[gates[GATE_2].state].on_click_open(&gates[GATE_2]);	break;
+		default: break;
 	}
 }
 
@@ -220,4 +209,6 @@ void on_sensor_detected(uint8_t id){
 		default:	break;
 	}
 }
+
+
 

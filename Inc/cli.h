@@ -12,6 +12,8 @@
 #include "string.h"
 #include "dom.h"
 #include "gate.h"
+#include "stdio.h"
+#include "stdlib.h"
 
 
 typedef uint8_t (*cli_sender_tt)(uint8_t*, uint16_t);
