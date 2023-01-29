@@ -6,6 +6,8 @@
  */
 #include "cli.h"
 
+#define CLI_BUF_SIZE (1000)
+
 
 static void cli_cmd_parser(uint8_t * cmd);
 
@@ -43,7 +45,7 @@ const char * help = "\r\n/h - help\r\n"
 		"\t '+' - led on\r\n"
 		"\t '-' - led off\r\n"
 		"\t '~' - led blink mode [frq, ...]";
-#define CLI_BUF_SIZE (1000)
+
 char cbuf[CLI_BUF_SIZE];
 uint8_t tbuf[80];
 uint16_t cbuf_len;

@@ -209,32 +209,15 @@ void on_ckick_button(uint8_t id){
  */
 void on_sensor_detected(uint8_t id){
 	switch(id){
-		case SENSOR_1:
-			gate_states[gates[GATE_1].state].on_detected_1(&gates[GATE_1]);
-		case SENSOR_2:
-			gate_states[gates[GATE_1].state].on_detected_2(&gates[GATE_1]);
-//			gate_sensors_motor_1_detected(&gates[GATE_1]);
-		break;
-		case SENSOR_3:
-			gate_states[gates[GATE_1].state].on_detected_3(&gates[GATE_1]);
-		case SENSOR_4:
-			gate_states[gates[GATE_1].state].on_detected_4(&gates[GATE_1]);
-			//gate_sensors_motor_2_detected(&gates[GATE_1]);
-		break;
-		case SENSOR_5:
-			gate_states[gates[GATE_2].state].on_detected_1(&gates[GATE_2]);
-		case SENSOR_6:
-			gate_states[gates[GATE_2].state].on_detected_2(&gates[GATE_2]);
-//			gate_sensors_motor_1_detected(&gates[GATE_2]);
-		break;
-		case SENSOR_7:
-			gate_states[gates[GATE_2].state].on_detected_3(&gates[GATE_2]);
-		case SENSOR_8:
-			gate_states[gates[GATE_2].state].on_detected_4(&gates[GATE_2]);
-//			gate_sensors_motor_2_detected(&gates[GATE_2]);
-		break;
-		default:
-		break;
+		case SENSOR_1: gate_states[gates[GATE_1].state].on_detected_1(&gates[GATE_1]);	break;
+		case SENSOR_2: gate_states[gates[GATE_1].state].on_detected_2(&gates[GATE_1]);	break;
+		case SENSOR_3: gate_states[gates[GATE_1].state].on_detected_3(&gates[GATE_1]);  break;
+		case SENSOR_4: gate_states[gates[GATE_1].state].on_detected_4(&gates[GATE_1]);	break;
+		case SENSOR_5: gate_states[gates[GATE_2].state].on_detected_1(&gates[GATE_2]);	break;
+		case SENSOR_6: gate_states[gates[GATE_2].state].on_detected_2(&gates[GATE_2]);	break;
+		case SENSOR_7: gate_states[gates[GATE_2].state].on_detected_3(&gates[GATE_2]);	break;
+		case SENSOR_8: gate_states[gates[GATE_2].state].on_detected_4(&gates[GATE_2]);	break;
+		default:	break;
 	}
 }
 
