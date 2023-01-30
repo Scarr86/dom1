@@ -7,7 +7,7 @@
 
 
 #include "dom.h"
-xLed_tt led = {
+xLed_pwm_tt led = {
 		.ccr = (uint32_t)&TIM1->CCR2,
 };
 
@@ -139,9 +139,9 @@ void dom_init(){
 		motor_init(&motor[i], i);
 		motor_set(&motor[i], settings_is_valid ? dom_settings.motor_settings[i].speed : MOTOR_SPEED_DEF);
 	}
-	led_on(&led);
+	led_pwm_on(&led);
 	motor_forward(&motor[MOTOR_5]);
-	//led_blink(&led, 4);
+	//led_pwm_blink(&led, 4);
 }
 void dom_poll(){
 	for(uint16_t i = 0; i < BUTTON_COUNT; ++i){
@@ -245,26 +245,26 @@ void dom_btn_4_on_click(){
 
 
 // LED FUNCTION START
-uint8_t dom_led_set(uint8_t on, uint8_t mode, uint8_t frq){
+uint8_t dom_led_pwm_set(uint8_t on, uint8_t mode, uint8_t frq){
 	if(mode == LED_BLINK_OFF){
 		if(on)
-			led_on(&led);
+			led_pwm_on(&led);
 		else
-			led_off(&led);
+			led_pwm_off(&led);
 	}
 	if(mode == LED_BLINK_ON){
-		led_blink(&led, frq);
+		led_pwm_blink(&led, frq);
 	}
 	return 0;
 }
-uint8_t dom_led_mode(){
-	return led_mode(&led);
+uint8_t dom_led_pwm_mode(){
+	return led_pwm_mode(&led);
 }
-uint8_t dom_led_state(){
-	return led_state(&led);
+uint8_t dom_led_pwm_state(){
+	return led_pwm_state(&led);
 }
-uint16_t dom_led_frq(){
-	return led_frq(&led);
+uint16_t dom_led_pwm_frq(){
+	return led_pwm_frq(&led);
 }
 // LED FUNCTION END
 

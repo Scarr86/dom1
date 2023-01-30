@@ -144,7 +144,7 @@ void cli_cmd_parser(uint8_t * cmd){
 					slen = sprintf(cbuf, "\r\nLED"
 							"\r\nblink: %s"
 							"\r\nstate: %s"
-							"\r\nfrq: %d", dom_led_mode() ? "on" : "off", dom_led_state() ? "on" : "off", dom_led_frq() );
+							"\r\nfrq: %d", dom_led_pwm_mode() ? "on" : "off", dom_led_pwm_state() ? "on" : "off", dom_led_pwm_frq() );
 					sender(cbuf, slen);
 				break;
 				case 's':
@@ -247,18 +247,18 @@ void cli_cmd_parser(uint8_t * cmd){
 			}
 			switch(*p){
 				case '-':
-					dom_led_set(0, LED_BLINK_OFF, 0);
+					dom_led_pwm_set(0, LED_BLINK_OFF, 0);
 				break;
 				case '+':
-					dom_led_set(1, LED_BLINK_OFF, 0);
+					dom_led_pwm_set(1, LED_BLINK_OFF, 0);
 				break;
 				case '~':
 					p = strtok(NULL, sep);
 					if(p == NULL){
-						result = dom_led_set(0, LED_BLINK_ON, 0);
+						result = dom_led_pwm_set(0, LED_BLINK_ON, 0);
 					}
 					else{
-						result = dom_led_set(0, LED_BLINK_ON, atoi(p));
+						result = dom_led_pwm_set(0, LED_BLINK_ON, atoi(p));
 					}
 					slen = sprintf(cbuf, "\n%s", result > 0 ? "fail" : "done");
 					sender(cbuf, slen);

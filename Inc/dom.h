@@ -9,7 +9,7 @@
 #define DOM_H_
 #include "main.h"
 #include "button.h"
-#include "led.h"
+#include "led-pwm.h"
 #include "sensor.h"
 #include "motor.h"
 #include "odometer.h"
@@ -97,10 +97,10 @@ void dom_btn_4_on_click();
 
 
 // LED START
-uint8_t dom_led_set(uint8_t on, uint8_t mode, uint8_t frq);
-uint8_t dom_led_mode();
-uint8_t dom_led_state();
-uint16_t dom_led_frq();
+uint8_t dom_led_pwm_set(uint8_t on, uint8_t mode, uint8_t frq);
+uint8_t dom_led_pwm_mode();
+uint8_t dom_led_pwm_state();
+uint16_t dom_led_pwm_frq();
 // LED END
 
 
