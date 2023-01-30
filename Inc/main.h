@@ -59,6 +59,8 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define SENSOR_RAIN_Pin GPIO_PIN_3
+#define SENSOR_RAIN_GPIO_Port GPIOF
 #define SS_REL_3_Pin GPIO_PIN_11
 #define SS_REL_3_GPIO_Port GPIOF
 #define SS_REL_2_Pin GPIO_PIN_12
@@ -73,6 +75,16 @@ void Error_Handler(void);
 #define GP_REL_1_GPIO_Port GPIOG
 #define DIR_REL_Pin GPIO_PIN_1
 #define DIR_REL_GPIO_Port GPIOG
+#define LED_MOTOR_MOVE_Pin GPIO_PIN_11
+#define LED_MOTOR_MOVE_GPIO_Port GPIOE
+#define LED_OPEN_CLOSE_GATE_1_Pin GPIO_PIN_12
+#define LED_OPEN_CLOSE_GATE_1_GPIO_Port GPIOE
+#define LED_OPEN_CLOSE_GATE_2_Pin GPIO_PIN_13
+#define LED_OPEN_CLOSE_GATE_2_GPIO_Port GPIOE
+#define LED_RAIN_Pin GPIO_PIN_14
+#define LED_RAIN_GPIO_Port GPIOE
+#define LED_PWM_1_Pin GPIO_PIN_14
+#define LED_PWM_1_GPIO_Port GPIOB
 #define PWM1_Pin GPIO_PIN_15
 #define PWM1_GPIO_Port GPIOB
 #define CLOSE_1_Pin GPIO_PIN_10

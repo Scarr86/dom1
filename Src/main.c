@@ -361,8 +361,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPIOF_CLK_ENABLE();
+  __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPIOG_CLK_ENABLE();
   __HAL_RCC_GPIOE_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
@@ -378,6 +378,15 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOG, GP_REL_1_Pin|DIR_REL_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOE, LED_MOTOR_MOVE_Pin|LED_OPEN_CLOSE_GATE_1_Pin|LED_OPEN_CLOSE_GATE_2_Pin|LED_RAIN_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : SENSOR_RAIN_Pin */
+  GPIO_InitStruct.Pin = SENSOR_RAIN_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(SENSOR_RAIN_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : SS_REL_3_Pin SS_REL_2_Pin SS_REL_1_Pin GP_REL_3_Pin
                            GP_REL_2_Pin */
@@ -399,6 +408,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pin = GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : LED_MOTOR_MOVE_Pin LED_OPEN_CLOSE_GATE_1_Pin LED_OPEN_CLOSE_GATE_2_Pin LED_RAIN_Pin */
+  GPIO_InitStruct.Pin = LED_MOTOR_MOVE_Pin|LED_OPEN_CLOSE_GATE_1_Pin|LED_OPEN_CLOSE_GATE_2_Pin|LED_RAIN_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
   /*Configure GPIO pins : CLOSE_1_Pin OPEN_1_Pin CLOSE_2_Pin OPEN_2_Pin

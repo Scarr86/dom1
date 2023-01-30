@@ -122,13 +122,17 @@ void gate_close(xGate_tt * g){
 	xSensor_tt * s2 = get_sensor(g->sid[2]);
 	xMotor_tt * m1 = get_motor(g->mid[0]);
 	xMotor_tt * m2 = get_motor(g->mid[1]);
-	if(!sensor_is_detected(s1)){
+	uint8_t is_detected_s1 = sensor_is_detected(s1);
+	uint8_t is_detected_s2 = sensor_is_detected(s2);
+	if(!is_detected_s1){
 		motor_forward(m1);
 	}
-	if(!sensor_is_detected(s2)){
+	if(!is_detected_s2){
 		motor_forward(m2);
 	}
-	gate_change(g->id, GATE_STATE_ClOSING);
+	if(!is_detected_s1 || !is_detected_s2){
+		gate_change(g->id, GATE_STATE_ClOSING);
+	}
 }
 
 void gate_open(xGate_tt * g){
@@ -136,14 +140,17 @@ void gate_open(xGate_tt * g){
 	xSensor_tt * s2 = get_sensor(g->sid[3]);
 	xMotor_tt * m1 = get_motor(g->mid[0]);
 	xMotor_tt * m2 = get_motor(g->mid[1]);
-	if(!sensor_is_detected(s1)){
+	uint8_t is_detected_s1 = sensor_is_detected(s1);
+	uint8_t is_detected_s2 = sensor_is_detected(s2);
+	if(!is_detected_s1){
 		motor_back(m1);
 	}
-	if(!sensor_is_detected(s2)){
+	if(!is_detected_s2){
 		motor_back(m2);
 	}
-	gate_change(g->id, GATE_STATE_OPENING);
-
+	if(!is_detected_s1 || !is_detected_s2){
+		gate_change(g->id, GATE_STATE_OPENING);
+	}
 }
 void gate_stop(xGate_tt * g){
 	xMotor_tt * m1 = get_motor(g->mid[0]);
@@ -155,6 +162,20 @@ void gate_stop(xGate_tt * g){
 
 void gate_change(GATE_ENUM id, GATE_STATE_ENUM new_state){
 	gates[id].state = new_state;
+
+	if(new_state == GATE_STATE_STOP){
+		dom_led_off(LED_MOTOR_MOVE);
+	}
+	else{
+		dom_led_on(LED_MOTOR_MOVE);
+		if(id == GATE_1){
+			dom_led_off(LED_OPEN_CLOSE_GATE_1);
+		}
+		if(id == GATE_2){
+			dom_led_off(LED_OPEN_CLOSE_GATE_2);
+		}
+	}
+
 	gate_notify(id);
 }
 
@@ -169,6 +190,12 @@ void gate_leaf_1_stop(xGate_tt * g){
 	xMotor_tt * m2 = get_motor(g->mid[1]);
 	motor_stop(m1);
 	if(motor_state(m2) == MOTOR_STATE_STOP){
+		if(g->id == GATE_1){
+			dom_led_on(LED_OPEN_CLOSE_GATE_1);
+		}
+		if(g->id == GATE_2){
+			dom_led_on(LED_OPEN_CLOSE_GATE_2);
+		}
 		gate_change(g->id, GATE_STATE_STOP);
 	}
 }
@@ -178,6 +205,12 @@ void gate_leaf_2_stop(xGate_tt * g){
 	xMotor_tt * m2 = get_motor(g->mid[1]);
 	motor_stop(m2);
 	if(motor_state(m1) == MOTOR_STATE_STOP){
+		if(g->id == GATE_1){
+			dom_led_on(LED_OPEN_CLOSE_GATE_1);
+		}
+		if(g->id == GATE_2){
+			dom_led_on(LED_OPEN_CLOSE_GATE_2);
+		}
 		gate_change(g->id, GATE_STATE_STOP);
 	}
 }

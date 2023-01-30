@@ -1,6 +1,8 @@
 {
 	"files.associations": {
 		"led.h": "c",
-		"dom.h": "c"
+		"dom.h": "c",
+		"rele.h": "c",
+		"sensor.h": "c"
 	}
 }

@@ -7,8 +7,23 @@
 
 
 #include "dom.h"
-xLed_pwm_tt led = {
+xLed_pwm_tt led_pwm = {
 		.ccr = (uint32_t)&TIM1->CCR2,
+};
+
+xLed_tt led []={
+		{
+				.GPIOx = LED_MOTOR_MOVE_GPIO_Port,
+				.pin = LED_MOTOR_MOVE_Pin
+		},
+		{
+				.GPIOx = LED_OPEN_CLOSE_GATE_1_GPIO_Port,
+				.pin = LED_OPEN_CLOSE_GATE_1_Pin
+		},
+		{
+				.GPIOx = LED_OPEN_CLOSE_GATE_2_GPIO_Port,
+				.pin = LED_OPEN_CLOSE_GATE_2_Pin
+		}
 };
 
 
@@ -80,6 +95,15 @@ xSensor_tt sensor[] ={
 
 };
 
+xSensor_rain_tt  sensor_rain[] = {
+		{
+				.GPIOx = SENSOR_RAIN_GPIO_Port,
+				.pin = SENSOR_RAIN_Pin,
+				.cmp_val = 1,
+				.on_change = dom_sensor_rain_1_on_change
+		}
+};
+
 xMotor_tt motor[]={
 		{
 				.GPIOx = GPIOG,
@@ -108,11 +132,39 @@ xMotor_tt motor[]={
 		},
 };
 
-xOdometer_tt odometer[4];
 
-xDom_settings_tt dom_settings;
-uint8_t settings_is_valid;
+xRele_tt rele[]={
+		{
+				.GPIOx = SS_REL_1_GPIO_Port,
+				.pin = SS_REL_1_Pin
+		},
+		{
+				.GPIOx = SS_REL_2_GPIO_Port,
+				.pin = SS_REL_2_Pin
+		},
+		{
+				.GPIOx = SS_REL_3_GPIO_Port,
+				.pin = SS_REL_3_Pin
+		}
+};
 
+xOdometer_tt odometer[4] = {
+	{
+			.on_change = dom_odometer_1_on_change
+	},
+	{
+			.on_change = dom_odometer_2_on_change
+	},
+	{
+			.on_change = dom_odometer_3_on_change
+	},
+	{
+			.on_change = dom_odometer_4_on_change
+	}
+};
+
+uint8_t odometer_observers_count;
+odometer_observers_fn odometer_observers[4];
 
 uint8_t btn_observers_count;
 btn_observers_fn btn_observers[4];
@@ -120,7 +172,12 @@ btn_observers_fn btn_observers[4];
 uint8_t sensor_observers_count;
 sensor_observers_fn sensor_observers[4];
 
+uint8_t sensor_rain_observers_count;
+odometer_observers_fn sensor_rain_observers[4];
 
+
+xDom_settings_tt dom_settings;
+uint8_t settings_is_valid;
 
 
 void dom_init(){
@@ -139,9 +196,13 @@ void dom_init(){
 		motor_init(&motor[i], i);
 		motor_set(&motor[i], settings_is_valid ? dom_settings.motor_settings[i].speed : MOTOR_SPEED_DEF);
 	}
-	led_pwm_on(&led);
+	for(uint16_t i = 0; i < RELE_COUNT; ++i){
+		rele_inactive(&rele[i]);
+	}
+
+	led_pwm_on(&led_pwm);
 	motor_forward(&motor[MOTOR_5]);
-	//led_pwm_blink(&led, 4);
+	//led_pwm_blink(&led_pwm, 4);
 }
 void dom_poll(){
 	for(uint16_t i = 0; i < BUTTON_COUNT; ++i){
@@ -174,13 +235,14 @@ uint8_t settings_read(xDom_settings_tt * ds){
 	}
 	return 0;
 }
-
-
 xButton_tt * get_button(BUTTON_ENUM id){
 	return &btn[id];
 }
 xSensor_tt * get_sensor(SENSOR_ENUM id){
 	return &sensor[id];
+}
+xSensor_rain_tt * get_sensor_rain(SENSOR_RAIN_ENUM id){
+	return &sensor_rain[id];
 }
 xMotor_tt * get_motor(MOTOR_ENUM id){
 	return &motor[id];
@@ -243,30 +305,39 @@ void dom_btn_4_on_click(){
 // BUTTON FUNCTION END
 
 
-
 // LED FUNCTION START
+void dom_led_on(uint8_t id){
+	led_on(&led[id]);
+}
+void dom_led_off(uint8_t id){
+	led_off(&led[id]);
+}
+// LED FUNCTION END
+
+
+// LED-PWM FUNCTION START
 uint8_t dom_led_pwm_set(uint8_t on, uint8_t mode, uint8_t frq){
 	if(mode == LED_BLINK_OFF){
 		if(on)
-			led_pwm_on(&led);
+			led_pwm_on(&led_pwm);
 		else
-			led_pwm_off(&led);
+			led_pwm_off(&led_pwm);
 	}
 	if(mode == LED_BLINK_ON){
-		led_pwm_blink(&led, frq);
+		led_pwm_blink(&led_pwm, frq);
 	}
 	return 0;
 }
 uint8_t dom_led_pwm_mode(){
-	return led_pwm_mode(&led);
+	return led_pwm_mode(&led_pwm);
 }
 uint8_t dom_led_pwm_state(){
-	return led_pwm_state(&led);
+	return led_pwm_state(&led_pwm);
 }
 uint16_t dom_led_pwm_frq(){
-	return led_pwm_frq(&led);
+	return led_pwm_frq(&led_pwm);
 }
-// LED FUNCTION END
+// LED-PWM FUNCTION END
 
 // SENSOR FUNCTION START
 uint8_t dom_sensor_set(uint8_t id, uint8_t cmpVal){
@@ -332,6 +403,29 @@ void dom_sensor_8_on_detected(){
 // SENSOR FUNCTION END
 
 
+// SENSOR-RAIN  FUNCTION START
+uint8_t dom_sensor_rain_subscribe(sensor_rain_observers_fn obs){
+	if(sensor_rain_observers_count < 4){
+		sensor_rain_observers[sensor_rain_observers_count] = obs;
+		++sensor_rain_observers_count;
+		return 0;
+	}
+	return 1;
+}
+uint8_t dom_sensor_rain_notify(uint8_t indx){
+	for(uint16_t i = 0; i < sensor_rain_observers_count; ++i){
+		sensor_rain_observers[i](indx);
+	}
+	return 0;
+}
+int8_t dom_sensor_rain_state(uint8_t id){
+	return sensor_rain_state(&sensor_rain[id]);
+}
+void dom_sensor_rain_1_on_change(){
+	dom_sensor_rain_notify(SENSOR_RAIN_1);
+}
+// SENSOR-RAIN FUNCTION END
+
 // MOTOR FUNCTION START
 int8_t dom_motor_state(uint8_t id){
 	if(id == 0 || id > MOTOR_COUNT)
@@ -381,12 +475,39 @@ void dom_motor_stop(uint8_t id){
 }
 // MOTOR FUNCTION END
 
-// ODOMETER START
+// ODOMETER FUNCTION START
+uint8_t dom_odometer_subscribe(odometer_observers_fn obs){
+	if(odometer_observers_count < 4){
+		odometer_observers[odometer_observers_count] = obs;
+		++odometer_observers_count;
+		return 0;
+	}
+	return 1;
+}
+uint8_t dom_odometer_notify(uint8_t id){
+	for(uint16_t i = 0; i < odometer_observers_count; ++i){
+		odometer_observers[i](id);
+	}
+	return 0;
+}
 xOdometer_tt * dom_odometer(uint8_t id){
 	return &odometer[id];
 }
 uint32_t dom_odometer_value(uint8_t id){
 	return odometer[id].val;
+}
+
+void dom_odometer_1_on_change(){
+	dom_odometer_notify(ODOMETER_1);
+}
+void dom_odometer_2_on_change(){
+	dom_odometer_notify(ODOMETER_2);
+}
+void dom_odometer_3_on_change(){
+	dom_odometer_notify(ODOMETER_3);
+}
+void dom_odometer_4_on_change(){
+	dom_odometer_notify(ODOMETER_4);
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
@@ -406,7 +527,16 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 		default: break;
 	}
 }
-// ODOMETER END
+// ODOMETER FUNCTION END
+
+// RELE FUNCTION START
+void dom_rele_active(uint8_t id){
+	rele_active(&rele[id]);
+}
+void dom_rele_inactive(uint8_t id){
+	rele_inactive(&rele[id]);
+}
+// RELE FUNCTION END
 
 
 

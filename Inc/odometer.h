@@ -13,9 +13,10 @@ typedef void (* observer_fn)();
 
 typedef struct{
 	uint32_t val;
-	observer_fn observers[4];
-	uint8_t observer_count;
+//	observer_fn observers[4];
+//	uint8_t observer_count;
 	uint8_t needpoll;
+	void (*on_change)();
 }xOdometer_tt;
 
 

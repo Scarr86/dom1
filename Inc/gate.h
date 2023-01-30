@@ -8,6 +8,7 @@
 #ifndef GATE_H_
 #define GATE_H_
 #include "dom.h"
+#include "led.h"
 
 typedef enum{
 	GATE_STATE_STOP = 0,
