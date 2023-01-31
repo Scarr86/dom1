@@ -16,6 +16,11 @@ void handler_cmd_status(uint8_t * params, uint16_t len);
 void handler_cmd_stop_dome(uint8_t * params, uint16_t len);
 void handler_cmd_open_dome(uint8_t * params, uint16_t len);
 void handler_cmd_close_dome(uint8_t * params, uint16_t len);
+void handler_cmd_shutter_move_deg(uint8_t * params, uint16_t len);
+void handler_cmd_switch_toggle(uint8_t * params, uint16_t len);
+void handler_cmd_arm_rain(uint8_t * params, uint16_t len);
+void handler_cmd_get_move_params(uint8_t * params, uint16_t len);
+void handler_cmd_set_move_params(uint8_t * params, uint16_t len);
 
 xCmd_tt cmds[] = {
 		{
@@ -33,6 +38,26 @@ xCmd_tt cmds[] = {
 		{
 				.cmd = "CLOSEDOME",
 				.handler = handler_cmd_close_dome
+		},
+		{
+				.cmd = "SHUTTERMOVEDEG",
+				.handler = handler_cmd_shutter_move_deg
+		},
+		{
+				.cmd = "SWITCHTOGGILE",
+				.handler = handler_cmd_switch_toggle
+		},
+		{
+				.cmd = "ARMRAIN",
+				.handler = handler_cmd_arm_rain
+		},
+		{
+				.cmd = "GETMOVEPARAMS",
+				.handler = handler_cmd_get_move_params
+		},
+		{
+				.cmd = "SETMOVEPARAMS",
+				.handler = handler_cmd_set_move_params
 		},
 };
 
@@ -89,4 +114,20 @@ void handler_cmd_open_dome(uint8_t * params, uint16_t len){
 void handler_cmd_close_dome(uint8_t * params, uint16_t len){
 	sender("OK\r\n", 4);
 	dome_close();
+}
+
+void handler_cmd_shutter_move_deg(uint8_t * params, uint16_t len){
+	sender("OK\r\n", 4);
+}
+void handler_cmd_switch_toggle(uint8_t * params, uint16_t len){
+	sender("OK\r\n", 4);
+}
+void handler_cmd_arm_rain(uint8_t * params, uint16_t len){
+	sender("OK\r\n", 4);
+}
+void handler_cmd_get_move_params(uint8_t * params, uint16_t len){
+	sender("OK\r\n", 4);
+}
+void handler_cmd_set_move_params(uint8_t * params, uint16_t len){
+	sender("OK\r\n", 4);
 }
