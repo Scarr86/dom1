@@ -102,8 +102,8 @@ uint16_t tx_len;
 uint8_t rx_lock;
 uint8_t tx_lock;
 
-uint8_t observer_count;
-usb_observers_tt observers[4];
+static uint8_t observer_count;
+static usb_observers_tt observers[4];
 
 
 /* USER CODE END PRIVATE_VARIABLES */
@@ -276,7 +276,8 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
 static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 6 */
-	CDC_Transmit_FS(Buf, *Len);
+	//TODO echo enter line
+	//CDC_Transmit_FS(Buf, *Len);
 
 	if(rx_len + *Len < APP_RX_DATA_SIZE){
 		memcpy(rx_buf + rx_len, Buf, *Len);

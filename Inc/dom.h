@@ -154,6 +154,7 @@ void dom_sensor_8_on_detected();
 // SENSOR END
 
 // SENSOR-RAIN START
+void dom_sensor_rain_set(uint8_t id, int8_t enable, int8_t cmpVal);
 uint8_t dom_sensor_rain_subscribe(sensor_rain_observers_fn obs);
 uint8_t dom_sensor_rain_notify(uint8_t indx);
 int8_t dom_sensor_rain_state(uint8_t id);

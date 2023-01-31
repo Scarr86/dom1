@@ -47,6 +47,10 @@ uint8_t gate_subscribe(gate_observer_fn observer_fn);
 
 xGate_tt * get_gate(GATE_ENUM id);
 
+void dome_close();
+void dome_open();
+void dome_stop();
+
 
 
 

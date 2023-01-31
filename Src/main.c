@@ -29,6 +29,7 @@
 #include "timer.h"
 #include "settings.h"
 #include "fletcher.h"
+#include "protocol.h"
 
 /* USER CODE END Includes */
 
@@ -117,6 +118,10 @@ int main(void)
 
   usb_subscribe(cli_parser);
   cli_init(usb_send);
+
+  usb_subscribe(protocol_parser);
+  protocol_init(usb_send);
+
   dom_init();
   gate_init();
 

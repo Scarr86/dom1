@@ -9,6 +9,7 @@ static void on_ckick_button(uint8_t id);
 static void on_sensor_detected(uint8_t id);
 static void on_sensor_rain_detected(uint8_t id);
 
+
 //typedef void (* sensor_rain_observers_fn)(uint8_t id);
 
 
@@ -120,9 +121,6 @@ void gate_notify(GATE_ENUM id){
 	}
 }
 
-
-
-
 void gate_close(xGate_tt * g){
 	xSensor_tt * s1 = get_sensor(g->sid[0]);
 	xSensor_tt * s2 = get_sensor(g->sid[2]);
@@ -185,8 +183,6 @@ void gate_change(GATE_ENUM id, GATE_STATE_ENUM new_state){
 	gate_notify(id);
 }
 
-
-
 void gate_def_leaf_stop(){
 
 }
@@ -221,7 +217,6 @@ void gate_leaf_2_stop(xGate_tt * g){
 	}
 }
 
-
 void on_ckick_button(uint8_t id){
 	switch(id){
 		case BUTTON_1: gate_states[gates[GATE_1].state].on_click_close(&gates[GATE_1]); break;
@@ -253,8 +248,7 @@ void on_sensor_rain_detected(uint8_t id){
 	if(id == SENSOR_RAIN_1){
 		if(dom_sensor_rain_is_detected(SENSOR_RAIN_1)){
 			dom_led_on(LED_RAIN);
-			gate_close(&gates[GATE_1]);
-			gate_close(&gates[GATE_2]);
+			dome_close();
 		}
 		else{
 			dom_led_off(LED_RAIN);
@@ -262,5 +256,17 @@ void on_sensor_rain_detected(uint8_t id){
 	}
 }
 
+void dome_close(){
+	gate_close(&gates[GATE_1]);
+	gate_close(&gates[GATE_2]);
+}
+void dome_open(){
+	gate_open(&gates[GATE_1]);
+	gate_open(&gates[GATE_2]);
+}
+void dome_stop(){
+	gate_stop(&gates[GATE_1]);
+	gate_stop(&gates[GATE_2]);
+}
 
 

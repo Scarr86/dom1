@@ -317,7 +317,6 @@ void dom_btn_4_on_click(){
 }
 // BUTTON FUNCTION END
 
-
 // LED FUNCTION START
 void dom_led_on(uint8_t id){
 	led_on(&led[id]);
@@ -326,7 +325,6 @@ void dom_led_off(uint8_t id){
 	led_off(&led[id]);
 }
 // LED FUNCTION END
-
 
 // LED-PWM FUNCTION START
 uint8_t dom_led_pwm_set(uint8_t on, uint8_t mode, uint8_t frq){
@@ -417,6 +415,9 @@ void dom_sensor_8_on_detected(){
 
 
 // SENSOR-RAIN  FUNCTION START
+void dom_sensor_rain_set(uint8_t id, int8_t enable, int8_t cmpVal){
+	sensor_rain_set(&sensor_rain[id], enable, cmpVal);
+}
 uint8_t dom_sensor_rain_subscribe(sensor_rain_observers_fn obs){
 	if(sensor_rain_observers_count < 4){
 		sensor_rain_observers[sensor_rain_observers_count] = obs;
@@ -434,11 +435,9 @@ uint8_t dom_sensor_rain_notify(uint8_t indx){
 int8_t dom_sensor_rain_state(uint8_t id){
 	return sensor_rain_state(&sensor_rain[id]);
 }
-
 int8_t dom_sensor_rain_is_detected(uint8_t id){
 	return sensor_rain_is_detected(&sensor_rain[id]);
 }
-
 void dom_sensor_rain_1_on_change(){
 	dom_sensor_rain_notify(SENSOR_RAIN_1);
 }
