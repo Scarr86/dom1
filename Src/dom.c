@@ -23,6 +23,10 @@ xLed_tt led []={
 		{
 				.GPIOx = LED_OPEN_CLOSE_GATE_2_GPIO_Port,
 				.pin = LED_OPEN_CLOSE_GATE_2_Pin
+		},
+		{
+				.GPIOx = LED_RAIN_GPIO_Port,
+				.pin = LED_RAIN_Pin
 		}
 };
 
@@ -99,7 +103,6 @@ xSensor_rain_tt  sensor_rain[] = {
 		{
 				.GPIOx = SENSOR_RAIN_GPIO_Port,
 				.pin = SENSOR_RAIN_Pin,
-				.cmp_val = 1,
 				.on_change = dom_sensor_rain_1_on_change
 		}
 };
@@ -200,6 +203,12 @@ void dom_init(){
 		rele_inactive(&rele[i]);
 	}
 
+	for(uint16_t i = 0; i < SENSOR_RAIN_COUNT; ++i){
+		sensor_rain_init(&sensor_rain[0]);
+		sensor_rain_set(&sensor_rain[0], 1, 1);
+	}
+
+
 	led_pwm_on(&led_pwm);
 	motor_forward(&motor[MOTOR_5]);
 	//led_pwm_blink(&led_pwm, 4);
@@ -214,6 +223,10 @@ void dom_poll(){
 	for(uint16_t i = 0; i < ODOMETER_COUNT; ++i){
 		odometer_poll(&odometer[i]);
 	}
+	for(uint16_t i = 0; i < SENSOR_RAIN_COUNT; ++i){
+		sensor_rain_poll(&sensor_rain[i]);
+	}
+
 }
 
 uint16_t settings_write(xDom_settings_tt * ds){
@@ -421,6 +434,11 @@ uint8_t dom_sensor_rain_notify(uint8_t indx){
 int8_t dom_sensor_rain_state(uint8_t id){
 	return sensor_rain_state(&sensor_rain[id]);
 }
+
+int8_t dom_sensor_rain_is_detected(uint8_t id){
+	return sensor_rain_is_detected(&sensor_rain[id]);
+}
+
 void dom_sensor_rain_1_on_change(){
 	dom_sensor_rain_notify(SENSOR_RAIN_1);
 }
@@ -509,7 +527,6 @@ void dom_odometer_3_on_change(){
 void dom_odometer_4_on_change(){
 	dom_odometer_notify(ODOMETER_4);
 }
-
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 	switch(GPIO_Pin){
 		case GPIO_PIN_7:

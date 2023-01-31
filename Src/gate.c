@@ -7,6 +7,9 @@
 #include "gate.h"
 static void on_ckick_button(uint8_t id);
 static void on_sensor_detected(uint8_t id);
+static void on_sensor_rain_detected(uint8_t id);
+
+//typedef void (* sensor_rain_observers_fn)(uint8_t id);
 
 
 /*
@@ -90,6 +93,12 @@ xGate_state_tt gate_states[] = {
 uint16_t gate_observer_count;
 static gate_observer_fn observer[4];
 
+void gate_init(){
+	dom_btn_subscribe(on_ckick_button);
+	dom_sensor_subscribe(on_sensor_detected);
+	dom_sensor_rain_subscribe(on_sensor_rain_detected);
+}
+
 xGate_tt * get_gate(GATE_ENUM id){
 	if(id > GATE_COUNT)
 		return NULL;
@@ -111,10 +120,7 @@ void gate_notify(GATE_ENUM id){
 	}
 }
 
-void gate_init(){
-	dom_btn_subscribe(on_ckick_button);
-	dom_sensor_subscribe(on_sensor_detected);
-}
+
 
 
 void gate_close(xGate_tt * g){
@@ -240,6 +246,19 @@ void on_sensor_detected(uint8_t id){
 		case SENSOR_7: gate_states[gates[GATE_2].state].on_detected_3(&gates[GATE_2]);	break;
 		case SENSOR_8: gate_states[gates[GATE_2].state].on_detected_4(&gates[GATE_2]);	break;
 		default:	break;
+	}
+}
+
+void on_sensor_rain_detected(uint8_t id){
+	if(id == SENSOR_RAIN_1){
+		if(dom_sensor_rain_is_detected(SENSOR_RAIN_1)){
+			dom_led_on(LED_RAIN);
+			gate_close(&gates[GATE_1]);
+			gate_close(&gates[GATE_2]);
+		}
+		else{
+			dom_led_off(LED_RAIN);
+		}
 	}
 }
 

@@ -72,6 +72,7 @@ typedef enum{
 	LED_MOTOR_MOVE,
 	LED_OPEN_CLOSE_GATE_1,
 	LED_OPEN_CLOSE_GATE_2,
+	LED_RAIN,
 	LED_COUNT
 }LED_ENUM;
 
@@ -156,6 +157,7 @@ void dom_sensor_8_on_detected();
 uint8_t dom_sensor_rain_subscribe(sensor_rain_observers_fn obs);
 uint8_t dom_sensor_rain_notify(uint8_t indx);
 int8_t dom_sensor_rain_state(uint8_t id);
+int8_t dom_sensor_rain_is_detected(uint8_t id);
 void dom_sensor_rain_1_on_change();
 // SENSOR-RAIN END
 
