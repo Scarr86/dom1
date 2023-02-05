@@ -1,4 +1,4 @@
-/*
+	/*
  * timer.h
  *
  *  Created on: 15 янв. 2023 г.
@@ -33,6 +33,7 @@ void timer_restart(xTimer_tt *t);
 void timer_stop(xTimer_tt * t);
 uint8_t timer_expired(xTimer_tt * t);
 uint8_t timers_poll();
+uint32_t timer_remaining(xTimer_tt * t);
 //uint8_t timer_poll(xTimer_tt * t);
 
 #endif /* TIMER_H_ */

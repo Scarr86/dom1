@@ -186,31 +186,43 @@ uint8_t settings_is_valid;
 void dom_init(){
 
 	settings_is_valid  = settings_read(&dom_settings);
+	//settings_is_valid  = 0;
 
 	for(uint16_t i = 0; i < BUTTON_COUNT; ++i){
 		btn_init(&btn[i]);
-		btn_set(&btn[i], settings_is_valid ? dom_settings.btn_settings[i].debounceTime : BUTTON_DEBOUNCE_TIME_DEF);
+		if(!settings_is_valid){
+			dom_settings.btn_settings[i].debounceTime = BUTTON_DEBOUNCE_TIME_DEF;
+		}
+		btn_set(&btn[i], dom_settings.btn_settings[i].debounceTime);
+
 	}
 	for(uint16_t i = 0; i < SENSOR_COUNT; ++i){
 		sensor_init(&sensor[i]);
-		sensor_set(&sensor[i], settings_is_valid ? dom_settings.sensor_settings[i].cmpVal: SENSOR_CMP_VAL_DEF);
+		if(!settings_is_valid){
+			dom_settings.sensor_settings[i].cmpVal = SENSOR_CMP_VAL_DEF;
+		}
+		sensor_set(&sensor[i], dom_settings.sensor_settings[i].cmpVal);
 	}
 	for(uint16_t i = 0; i < MOTOR_COUNT; ++i){
 		motor_init(&motor[i], i);
-		motor_set(&motor[i], settings_is_valid ? dom_settings.motor_settings[i].speed : MOTOR_SPEED_DEF);
+		if(!settings_is_valid){
+			dom_settings.motor_settings[i].speed = MOTOR_SPEED_DEF;
+			dom_settings.motor_settings[i].deg_speed = MOTOR_DEG_SPEED_DEF;
+		}
+		motor_set(&motor[i], dom_settings.motor_settings[i].speed, dom_settings.motor_settings[i].deg_speed);
 	}
 	for(uint16_t i = 0; i < RELE_COUNT; ++i){
 		rele_inactive(&rele[i]);
 	}
 
 	for(uint16_t i = 0; i < SENSOR_RAIN_COUNT; ++i){
-		sensor_rain_init(&sensor_rain[0]);
-		sensor_rain_set(&sensor_rain[0], 1, 1);
+		sensor_rain_init(&sensor_rain[i]);
+		sensor_rain_set(&sensor_rain[i], 1, 1);
 	}
 
 
 	led_pwm_on(&led_pwm);
-	motor_forward(&motor[MOTOR_5]);
+	//motor_forward(&motor[MOTOR_5]);
 	//led_pwm_blink(&led_pwm, 4);
 }
 void dom_poll(){
@@ -450,29 +462,39 @@ int8_t dom_motor_state(uint8_t id){
 	return motor_state(&motor[id-1]);
 }
 int16_t dom_motor_speed(uint8_t id){
-	if(id == 0 || id > MOTOR_COUNT)
-		return -1;
-	return motor_speed(&motor[id-1]);
+	return motor_speed(&motor[id]);
+}
+int16_t dom_motor_deg_speed(uint8_t id){
+	return motor_deg_speed(&motor[id]);
 }
 int8_t dom_motor_dir(uint8_t id){
 	if(id == 0 || id > MOTOR_COUNT)
 		return -1;
 	return motor_dir(&motor[id-1]);
 }
-uint8_t dom_motor_set(uint8_t id, uint16_t speed){
+uint8_t dom_motor_set(uint8_t id, int16_t speed, int16_t deg_speed){
 
 	// return 0 - no error, 1 -error
 	if(id == 0 || id > MOTOR_COUNT || speed > MOTOR_SPEED_MAX){
 		return 1;
 	}
-	if(speed == 0){
-		return 0;
+
+	if(speed != -1){
+		dom_settings.motor_settings[id - 1].speed = speed;
+		motor_set(&motor[id-1], speed, -1);
 	}
-	dom_settings.motor_settings[id - 1].speed = speed;
-	motor_set(&motor[id-1], speed);
-	if(!settings_write(&dom_settings)){
-		return 0;
+	if(deg_speed != -1){
+		dom_settings.motor_settings[id - 1].deg_speed = deg_speed;
+		motor_set(&motor[id-1], -1, deg_speed);
 	}
+
+
+	if(speed != -1 || deg_speed != -1){
+		if(!settings_write(&dom_settings)){
+			return 0;
+		}
+	}
+
 	return 1;
 }
 void dom_motor_forward(uint8_t id){
@@ -490,6 +512,21 @@ void dom_motor_stop(uint8_t id){
 		return;
 	motor_stop(&motor[id-1]);
 }
+uint32_t dom_motor_dist(uint8_t id){
+	return motor_dist(&motor[id]);
+}
+uint32_t dom_motor_deg(uint8_t id){
+	return motor_deg(&motor[id]);
+}
+//void dom_motor_dist_clear(uint8_t id){
+//	motor_dist_clear(&motor[id]);
+//}
+//void dom_motor_dist_start(uint8_t id){
+//	motor_dist_start(&motor[id]);
+//}
+//void dom_motor_dist_stop(uint8_t id){
+//	motor_dist_stop(&motor[id]);
+//}
 // MOTOR FUNCTION END
 
 // ODOMETER FUNCTION START

@@ -21,9 +21,10 @@
 #include "settings.h"
 #include "fletcher.h"
 
-#define BUTTON_DEBOUNCE_TIME_DEF (100)
+#define BUTTON_DEBOUNCE_TIME_DEF (200)
 #define SENSOR_CMP_VAL_DEF (1)
 #define MOTOR_SPEED_DEF (250)
+#define MOTOR_DEG_SPEED_DEF (115)
 
 typedef enum{
 	BUTTON_1,
@@ -166,11 +167,18 @@ void dom_sensor_rain_1_on_change();
 // MOTOR START
 int8_t dom_motor_state(uint8_t id);
 int16_t dom_motor_speed(uint8_t id);
+int16_t dom_motor_deg_speed(uint8_t id);
 int8_t dom_motor_dir(uint8_t id);
-uint8_t dom_motor_set(uint8_t id, uint16_t speed);
+uint8_t dom_motor_set(uint8_t id, int16_t speed, int16_t deg_speed);
 void dom_motor_forward(uint8_t id);
 void dom_motor_back(uint8_t id);
 void dom_motor_stop(uint8_t id);
+uint32_t dom_motor_dist(uint8_t id);
+uint32_t dom_motor_deg(uint8_t id);
+//void dom_motor_dist_clear(uint8_t id);
+//void dom_motor_dist_start(uint8_t id);
+//void dom_motor_dist_stop(uint8_t id);
+
 // MOTOR END
 
 // ODOMETER START

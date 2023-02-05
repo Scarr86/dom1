@@ -105,6 +105,8 @@ void cli_cmd_parser(uint8_t * cmd){
 
 	uint8_t id;
 	uint8_t result;
+	int16_t param[10] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+	uint16_t iparam = 0;
 
 	char * p = strtok(cmd, sep);
 	if(strlen(p) > 1){
@@ -173,10 +175,22 @@ void cli_cmd_parser(uint8_t * cmd){
 						return;
 					}
 					id = atoi(p);
+					if(id == 0 || id > MOTOR_COUNT){
+						slen = sprintf(cbuf, "\r\nincorrect command");
+						sender(cbuf, slen);
+						return;
+					}
+					id -= 1;
 					slen = sprintf(cbuf, "\r\nMOTOR %d\r\n"
 							"state: %d\r\n"
 							"speed: %d\r\n"
-							"dir: %d", id, dom_motor_state(id), dom_motor_speed(id), dom_motor_dir(id));
+							"deg_speed: %d\r\n"
+							"dir: %d",
+							id + 1,
+							dom_motor_state(id),
+							dom_motor_speed(id),
+							dom_motor_deg_speed(id),
+							dom_motor_dir(id));
 					sender(cbuf, slen);
 				break;
 				case 'g':
@@ -192,13 +206,25 @@ void cli_cmd_parser(uint8_t * cmd){
 					if(id == 0 || id > GATE_COUNT){
 						slen = sprintf(cbuf, "\r\nincorrect command");
 						sender(cbuf, slen);
+						return;
 					}
-					else{
-						slen = sprintf(cbuf, "\r\nGATE %d\r\n"
-								"state: %s",id, get_gate(id - 1)->state == GATE_STATE_STOP ? "STOP":
-										get_gate(id - 1)->state == GATE_STATE_ClOSING ? "ClOSING" : "OPENING" );
-						sender(cbuf, slen);
-					}
+					id -= 1;
+					slen = sprintf(cbuf, "\r\nGATE %d\r\n"
+							"state: %s\r\n"
+							"dist_1: %lu\r\n"
+							"deg_1: %lu\r\n"
+							"dist_2: %lu\r\n"
+							"deg_2: %lu",
+							id + 1,
+							get_gate(id)->state == GATE_STATE_STOP ? "STOP":
+									get_gate(id)->state == GATE_STATE_ClOSING ? "ClOSING" : "OPENING",
+							dom_motor_dist(get_gate(id)->mid[0]),
+							dom_motor_deg(get_gate(id)->mid[0]),
+							dom_motor_dist(get_gate(id)->mid[1]),
+							dom_motor_deg(get_gate(id)->mid[1])
+											);
+					sender(cbuf, slen);
+
 				break;
 				case 'o':
 					p = strtok(NULL, sep);
@@ -295,13 +321,12 @@ void cli_cmd_parser(uint8_t * cmd){
 					dom_motor_stop(id);
 				break;
 				case '=':
-					p = strtok(NULL, sep);
-					if(p == NULL){
-						result = dom_motor_set(id, 0);
+					iparam = 0;
+					while(p = strtok(NULL, sep)){
+						param[iparam] = atoi(p);
+						++iparam;
 					}
-					else{
-						result = dom_motor_set(id, atoi(p));
-					}
+					result = dom_motor_set(id, param[0], param[1]);
 					slen = sprintf(cbuf, "\n%s", result > 0 ? "fail" : "done");
 					sender(cbuf, slen);
 				break;

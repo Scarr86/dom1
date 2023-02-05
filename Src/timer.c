@@ -93,3 +93,7 @@ uint8_t timer_expired(xTimer_tt * t){
 	uint32_t diff = (HAL_GetTick() - t->start) + 1;
 	return diff > t->interval;
 }
+
+uint32_t timer_remaining(xTimer_tt * t){
+	return t->start + t->interval - HAL_GetTick();
+}
