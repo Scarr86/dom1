@@ -29,9 +29,7 @@ typedef struct{
 	uint16_t speed;
 	uint16_t deg_speed;
 	uint8_t state;
-	uint8_t full_open;
-	uint8_t full_close;
-	uint32_t dist;
+	int32_t dist;
 	xTimer_tt timer;
 }xMotor_tt;
 
@@ -47,8 +45,8 @@ int8_t motor_dir(xMotor_tt *m);
 uint8_t motor_state(xMotor_tt * m);
 
 
-uint32_t motor_deg(xMotor_tt * m);
-uint32_t motor_dist(xMotor_tt * m);
+int32_t motor_deg(xMotor_tt * m);
+int32_t motor_dist(xMotor_tt * m);
 void motor_dist_clear(xMotor_tt * m);
 void motor_dist_start(xMotor_tt * m, void(*calc_dist)(xTimer_tt * t, void * thisArg));
 void motor_dist_stop(xMotor_tt * m);

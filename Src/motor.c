@@ -62,12 +62,12 @@ uint8_t motor_state(xMotor_tt * m){
 }
 
 
-uint32_t motor_deg(xMotor_tt * m){
+int32_t motor_deg(xMotor_tt * m){
 	uint32_t deg = m->dist / (m->deg_speed * (1000 / DIST_TIMER_GAP) );
 	return (uint8_t)deg;
 }
 
-uint32_t motor_dist(xMotor_tt * m){
+int32_t motor_dist(xMotor_tt * m){
 	return m->dist;
 }
 
@@ -80,13 +80,13 @@ void motor_dist_start(xMotor_tt * m, void(*calc_dist)(xTimer_tt * t, void * this
 void motor_dist_stop(xMotor_tt * m){
 	timer_stop(&m->timer);
 	uint32_t diff = DIST_TIMER_GAP - timer_remaining(&m->timer);
+	uint32_t dist = (m->speed * diff)/ DIST_TIMER_GAP;
 	if(m->state == MOTOR_STATE_FORWARD){
-		m->dist += diff;
+		m->dist += dist;
 	}
 	if(m->state == MOTOR_STATE_BACK){
-		m->dist =  m->dist < diff ? 0 : m->dist - diff;
+		m->dist -=  dist;
 	}
-	return (m->speed * diff)/ DIST_TIMER_GAP;
 }
 void calc_dist_inc(xTimer_tt * t, void * thisArg){
 	xMotor_tt * m = thisArg;
@@ -96,10 +96,5 @@ void calc_dist_inc(xTimer_tt * t, void * thisArg){
 void calc_dist_dec(xTimer_tt * t, void * thisArg){
 	xMotor_tt * m = thisArg;
 	timer_reset(t);
-	if(m->dist < m->speed){
-		m->dist = 0;
-	}
-	else{
-		m->dist -= m->speed;
-	}
+	m->dist -= m->speed;
 }

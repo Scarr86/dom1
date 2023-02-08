@@ -29,6 +29,9 @@ uint8_t sensor_rain_is_enable(xSensor_rain_tt * s){
 uint8_t sensor_rain_state(xSensor_rain_tt * s){
 	return s->state;
 }
+uint8_t sensor_rain_cmpval(xSensor_rain_tt * s){
+	return s->cmp_val;
+}
 uint8_t sensor_rain_is_detected(xSensor_rain_tt * s){
 	return s->state == s->cmp_val;
 }

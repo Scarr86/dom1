@@ -59,3 +59,4 @@ SETMOVEPARAMS<pwm_break>,<pwm_full>,<pwm_accel>,<angle_break>,<0>,<0>,<RainInf> 
 <RainInf> - установка срабатывания датчика дождя. 1 – срабатывание при высоком
 логическом уровне. 1 - срабатывание при низком логическом уровне.
 
+The float formatting support is not enabled, check your MCU Settings from "Project Properties > C/C++ Build > Settings > Tool Settings", or add manually "-u _printf_float" in linker flags.

@@ -27,6 +27,7 @@ typedef struct{
 	MOTOR_ENUM mid[2];
 	SENSOR_ENUM sid[4];
 	GATE_STATE_ENUM state;
+	float koef;
 }xGate_tt;
 
 
@@ -48,8 +49,15 @@ uint8_t gate_subscribe(gate_observer_fn observer_fn);
 xGate_tt * get_gate(GATE_ENUM id);
 
 void dome_close();
-void dome_open();
+void dome_open(uint8_t id, uint16_t angle);
 void dome_stop();
+
+uint8_t dome_state(uint8_t id);
+
+//возращает угол закрытия верхней створки
+uint8_t dome_encoder(uint8_t id);
+
+float dome_koef(uint8_t id);
 
 
 

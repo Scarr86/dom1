@@ -25,6 +25,14 @@
 #define SENSOR_CMP_VAL_DEF (1)
 #define MOTOR_SPEED_DEF (250)
 #define MOTOR_DEG_SPEED_DEF (115)
+#define SENSOR_RAIN_ENABLE_DEF (1)
+#define SENSOR_RAIN_CMP_VAL_DEF (1)
+
+#define PWM_BREAK_DEF (100)
+#define PWM_FULL_DEF (400)
+#define PWM_ACCEL_DEF (150)
+#define ANGLE_BREAK_DEF (30)
+
 
 typedef enum{
 	BUTTON_1,
@@ -89,7 +97,12 @@ typedef enum{
 typedef struct{
 	xButton_settings_tt btn_settings[BUTTON_COUNT];
 	xSensor_settings_tt sensor_settings[SENSOR_COUNT];
+	xSensor_rain_settings_tt sensor_rain_settings[SENSOR_RAIN_COUNT];
 	xMotor_settings_tt motor_settings[MOTOR_COUNT];
+	uint16_t pwm_break;
+	uint16_t pwm_full;
+	uint16_t pwm_accel;
+	uint16_t angle_break;
 }xDom_settings_tt;
 
 typedef void (* btn_observers_fn)(uint8_t id);
@@ -155,11 +168,13 @@ void dom_sensor_8_on_detected();
 // SENSOR END
 
 // SENSOR-RAIN START
-void dom_sensor_rain_set(uint8_t id, int8_t enable, int8_t cmpVal);
+uint8_t dom_sensor_rain_set(uint8_t id, int8_t enable, int8_t cmpVal);
 uint8_t dom_sensor_rain_subscribe(sensor_rain_observers_fn obs);
 uint8_t dom_sensor_rain_notify(uint8_t indx);
 int8_t dom_sensor_rain_state(uint8_t id);
 int8_t dom_sensor_rain_is_detected(uint8_t id);
+int8_t dom_sensor_rain_is_enable(uint8_t id);
+uint8_t dom_sensor_rain_cmpval(uint8_t id);
 void dom_sensor_rain_1_on_change();
 // SENSOR-RAIN END
 
@@ -195,8 +210,20 @@ void dom_odometer_4_on_change();
 // RELE START
 void dom_rele_active(uint8_t id);
 void dom_rele_inactive(uint8_t id);
+uint8_t dom_rele_is_active(uint8_t id);
 // RELE END
 
+
+// MOVE PARAMS START
+uint16_t dom_pwm_break();
+uint16_t dom_pwm_full();
+uint16_t dom_pwm_accel();
+uint16_t dom_angle_break();
+uint8_t dom_pwm_break_set(uint16_t val);
+uint8_t dom_pwm_full_set(uint16_t val);
+uint8_t dom_pwm_accel_set(uint16_t val);
+uint8_t dom_angle_break_set(uint16_t val);
+// MOVE PARAMS END
 
 
 

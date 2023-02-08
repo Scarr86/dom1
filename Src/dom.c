@@ -7,6 +7,13 @@
 
 
 #include "dom.h"
+
+//uint16_t pwm_break;
+//uint16_t pwm_full;
+//uint16_t pwm_accel;
+//uint16_t angle_break;
+
+
 xLed_pwm_tt led_pwm = {
 		.ccr = (uint32_t)&TIM1->CCR2,
 };
@@ -217,8 +224,22 @@ void dom_init(){
 
 	for(uint16_t i = 0; i < SENSOR_RAIN_COUNT; ++i){
 		sensor_rain_init(&sensor_rain[i]);
-		sensor_rain_set(&sensor_rain[i], 1, 1);
+		if(!settings_is_valid){
+			dom_settings.sensor_rain_settings[i].enable = SENSOR_RAIN_ENABLE_DEF;
+			dom_settings.sensor_rain_settings[i].cmp_val = SENSOR_RAIN_CMP_VAL_DEF;
+		}
+		sensor_rain_set(&sensor_rain[i],
+				dom_settings.sensor_rain_settings[i].enable,
+				dom_settings.sensor_rain_settings[i].cmp_val);
 	}
+
+	if(!settings_is_valid){
+		dom_settings.pwm_break = PWM_BREAK_DEF;
+		dom_settings.pwm_full = PWM_FULL_DEF;
+		dom_settings.pwm_accel = PWM_ACCEL_DEF;
+		dom_settings.angle_break = ANGLE_BREAK_DEF;
+	}
+
 
 
 	led_pwm_on(&led_pwm);
@@ -427,8 +448,16 @@ void dom_sensor_8_on_detected(){
 
 
 // SENSOR-RAIN  FUNCTION START
-void dom_sensor_rain_set(uint8_t id, int8_t enable, int8_t cmpVal){
+uint8_t dom_sensor_rain_set(uint8_t id, int8_t enable, int8_t cmpVal){
+
+	if(enable >= 0)
+		dom_settings.sensor_rain_settings[id].enable = enable;
+	if(cmpVal >= 0)
+		dom_settings.sensor_rain_settings[id].cmp_val = cmpVal;
+
 	sensor_rain_set(&sensor_rain[id], enable, cmpVal);
+
+	return settings_write(&dom_settings);
 }
 uint8_t dom_sensor_rain_subscribe(sensor_rain_observers_fn obs){
 	if(sensor_rain_observers_count < 4){
@@ -449,6 +478,12 @@ int8_t dom_sensor_rain_state(uint8_t id){
 }
 int8_t dom_sensor_rain_is_detected(uint8_t id){
 	return sensor_rain_is_detected(&sensor_rain[id]);
+}
+int8_t dom_sensor_rain_is_enable(uint8_t id){
+	return sensor_rain_is_enable(&sensor_rain[id]);
+}
+uint8_t dom_sensor_rain_cmpval(uint8_t id){
+	return sensor_rain_cmpval(&sensor_rain[id]);
 }
 void dom_sensor_rain_1_on_change(){
 	dom_sensor_rain_notify(SENSOR_RAIN_1);
@@ -550,7 +585,6 @@ xOdometer_tt * dom_odometer(uint8_t id){
 uint32_t dom_odometer_value(uint8_t id){
 	return odometer[id].val;
 }
-
 void dom_odometer_1_on_change(){
 	dom_odometer_notify(ODOMETER_1);
 }
@@ -589,9 +623,41 @@ void dom_rele_active(uint8_t id){
 void dom_rele_inactive(uint8_t id){
 	rele_inactive(&rele[id]);
 }
+uint8_t dom_rele_is_active(uint8_t id){
+	return rele_is_active(&rele[id]);
+}
 // RELE FUNCTION END
 
-
+// MOVE PARAMS START
+uint16_t dom_pwm_break(){
+	return dom_settings.pwm_break;
+}
+uint16_t dom_pwm_full(){
+	return dom_settings.pwm_full;
+}
+uint16_t dom_pwm_accel(){
+	return dom_settings.pwm_accel;
+}
+uint16_t dom_angle_break(){
+	return dom_settings.angle_break;
+}
+uint8_t dom_pwm_break_set(uint16_t val){
+	dom_settings.pwm_break = val;
+	return settings_write(&dom_settings); // 0- ok 1- error
+}
+uint8_t dom_pwm_full_set(uint16_t val){
+	dom_settings.pwm_full = val;
+	return settings_write(&dom_settings);
+}
+uint8_t dom_pwm_accel_set(uint16_t val){
+	dom_settings.pwm_accel = val;
+	return settings_write(&dom_settings);
+}
+uint8_t dom_angle_break_set(uint16_t val){
+	dom_settings.angle_break = val;
+	return settings_write(&dom_settings);
+}
+// MOVE PARAMS END
 
 
 

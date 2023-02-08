@@ -17,6 +17,7 @@ typedef struct{
 
 void rele_active(xRele_tt * rele);
 void rele_inactive(xRele_tt * rele);
+uint8_t rele_is_active(xRele_tt * rele);
 
 
 

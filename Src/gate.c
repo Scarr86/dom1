@@ -5,6 +5,11 @@
  *      Author: Denis
  */
 #include "gate.h"
+
+
+
+
+
 static void on_ckick_button(uint8_t id);
 static void on_sensor_detected(uint8_t id);
 static void on_sensor_rain_detected(uint8_t id);
@@ -32,9 +37,6 @@ static void gate_def_leaf_stop();
 static void gate_leaf_1_stop(xGate_tt * g);
 // остановить 2ю створку(верхняя)(в параметрах указатель на ворота)
 static void gate_leaf_2_stop(xGate_tt * g);
-
-
-
 
 
 static void gate_change(GATE_ENUM id, GATE_STATE_ENUM new_state);
@@ -260,13 +262,33 @@ void dome_close(){
 	gate_close(&gates[GATE_1]);
 	gate_close(&gates[GATE_2]);
 }
-void dome_open(){
-	gate_open(&gates[GATE_1]);
-	gate_open(&gates[GATE_2]);
+void dome_open(uint8_t id, uint16_t angle){
+	if(angle >= 90){
+		gate_open(&gates[id]);
+	}
+	else{
+		//TODO
+		gate_open(&gates[id]);
+	}
 }
 void dome_stop(){
 	gate_stop(&gates[GATE_1]);
 	gate_stop(&gates[GATE_2]);
 }
+
+uint8_t dome_state(uint8_t id){
+	//TODO
+	return 3;
+}
+//возращает угол закрытия верхней створки
+uint8_t dome_encoder(uint8_t id){
+	// TODO
+	return 0;
+}
+float dome_koef(uint8_t id){
+	//TODO
+	return gates[id].koef;
+}
+
 
 
