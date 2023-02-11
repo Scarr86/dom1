@@ -28,6 +28,7 @@ typedef struct{
 	SENSOR_ENUM sid[4];
 	GATE_STATE_ENUM state;
 	float koef;
+	int16_t angle;
 }xGate_tt;
 
 
@@ -43,16 +44,28 @@ typedef struct{
 
 
 typedef void (* gate_observer_fn)(GATE_ENUM id);
+
 void gate_init();
+
 uint8_t gate_subscribe(gate_observer_fn observer_fn);
 
 xGate_tt * get_gate(GATE_ENUM id);
 
-void dome_close();
+uint16_t gate_speed(uint8_t id);
+
+void gate_poll(uint8_t id);
+
+void dome_poll();
+
+//void dome_close();
+
+// указать номер ворот и нужный угол (считается от вертикали)
 void dome_open(uint8_t id, uint16_t angle);
+
 void dome_stop();
 
 uint8_t dome_state(uint8_t);
+
 uint8_t dome_status(uint8_t id);
 
 //возращает угол закрытия верхней створки
@@ -60,9 +73,10 @@ uint8_t dome_encoder(uint8_t id);
 
 float dome_koef(uint8_t id);
 
-
 int32_t dome_dist(uint8_t id);
+
 int32_t dome_pos(uint8_t id);
+
 // возращает измереное значение
 uint16_t dome_deg_speed(uint8_t id);
 

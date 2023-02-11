@@ -124,12 +124,13 @@ void handler_cmd_stop_dome(uint8_t * params, uint16_t len){
 	sender("OK\r\n", 4);
 }
 void handler_cmd_open_dome(uint8_t * params, uint16_t len){
-	dome_open(0, 90);
-	dome_open(1, 90);
+	dome_open(GATE_1, 90);
+	dome_open(GATE_2, 90);
 	sender("OK\r\n", 4);
 }
 void handler_cmd_close_dome(uint8_t * params, uint16_t len){
-	dome_close();
+	dome_open(GATE_1, 0);
+	dome_open(GATE_2, 0);
 	sender("OK\r\n", 4);
 }
 

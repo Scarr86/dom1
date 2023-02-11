@@ -517,14 +517,12 @@ uint8_t dom_motor_set(uint8_t id, int16_t speed, int16_t min_speed, int16_t deg_
 
 	if(speed != -1){
 		dom_settings.pwm_full = speed;
-		motor_set(&motor[id-1], speed, -1, -1);
 	}
 	if(min_speed != -1){
 		dom_settings.pwm_break = min_speed;
 	}
 	if(deg_speed != -1){
 		dom_settings.motor_settings[id - 1].deg_speed = deg_speed;
-		motor_set(&motor[id-1], -1, deg_speed, -1);
 	}
 
 	if(speed != -1 || deg_speed != -1 || min_speed != -1){

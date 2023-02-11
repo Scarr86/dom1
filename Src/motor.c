@@ -7,6 +7,8 @@
 
 #include "motor.h"
 
+uint16_t new_speed;
+
 
 void motor_init(xMotor_tt * m, uint8_t id){
 	m->id = id;
@@ -25,15 +27,28 @@ void motor_stop(xMotor_tt * m){
 	if(m->speed)
 		timer_set(&m->accel_timer, DIST_TIMER_GAP, accel_stop, m);
 	else{
+		timer_del(&m->accel_timer);
 		motor_pos_stop(m);
 	}
-	//*((uint32_t *)m->ccr) = 0;
+	new_speed = 0;
 }
 
 void motor_speed_set(xMotor_tt * m, uint16_t speed){
+
+	if(m->state == MOTOR_STATE_STOP){
+		m->speed = speed;
+		return;
+	}
+
 	if(m->speed == speed){
 		return;
 	}
+
+	if(new_speed == speed){
+		return;
+	}
+
+
 
 	if(m->speed > speed){
 		if(m->speed > m->accel){
@@ -43,6 +58,7 @@ void motor_speed_set(xMotor_tt * m, uint16_t speed){
 			m->speed = speed;
 		}
 		if(m->speed != speed){	//вызываются разные callback
+			new_speed = speed;
 			timer_set(&m->accel_timer, DIST_TIMER_GAP, accel_move_dec, m);
 		}
 	}
@@ -50,6 +66,7 @@ void motor_speed_set(xMotor_tt * m, uint16_t speed){
 	if(m->speed < speed){
 		m->speed = m->speed + m->accel < speed ?  m->speed + m->accel: speed;
 		if(m->speed != speed){//вызываются разные callback
+			new_speed = speed;
 			timer_set(&m->accel_timer, DIST_TIMER_GAP, accel_move_inc, m);
 		}
 	}
@@ -186,16 +203,44 @@ void accel_stop(xTimer_tt * t, void * thisArg){
 	xMotor_tt * m = (xMotor_tt *) thisArg;
 	m->speed = m->speed > m->accel ? m->speed - m->accel: 0;
 	if(m->speed){
+		timer_reset(t);
+	}
+	else{
 		motor_pos_stop(m);
-		*((uint32_t *)m->ccr) = m->speed;
+	}
+	*((uint32_t *)m->ccr) = m->speed;
+}
+void accel_move_inc(xTimer_tt * t, void * thisArg){
+	xMotor_tt * m = (xMotor_tt *) thisArg;
+
+	m->speed = m->speed + m->accel < new_speed ?  m->speed + m->accel: new_speed;
+
+	if(m->speed == new_speed){
+		new_speed = 0;
 	}
 	else{
 		timer_reset(t);
 	}
-}
-void accel_move_inc(xTimer_tt * t, void * thisArg){
 
+	*((uint32_t *)m->ccr) = m->speed;
 }
 void accel_move_dec(xTimer_tt * t, void * thisArg){
+	xMotor_tt * m = (xMotor_tt *) thisArg;
+
+	if(m->speed > m->accel){
+		m->speed = (m->speed - m->accel) > new_speed ? m->speed - m->accel:  new_speed;
+	}
+	else{
+		m->speed = new_speed;
+	}
+
+	if(m->speed == new_speed){
+		new_speed = 0;
+	}
+	else{
+		timer_reset(t);
+	}
+
+	*((uint32_t *)m->ccr) = m->speed;
 
 }

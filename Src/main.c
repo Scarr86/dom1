@@ -142,6 +142,7 @@ int main(void)
 	timers_poll();
 	usb_poll();
 	dom_poll();
+	dome_poll();
   }
   /* USER CODE END 3 */
 }

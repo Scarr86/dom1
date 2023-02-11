@@ -108,6 +108,17 @@ xGate_tt * get_gate(GATE_ENUM id){
 	return &gates[id];
 }
 
+
+uint16_t gate_speed(uint8_t id){
+	uint16_t deg = dome_encoder(id);
+	if(deg > dom_angle_break() && deg < (90 - dom_angle_break())){
+		return dom_pwm_full();
+	}
+	else{
+		return dom_pwm_break();
+	}
+}
+
 uint8_t gate_subscribe(gate_observer_fn observer_fn){
 	if(gate_observer_count < 4){
 		observer[gate_observer_count] = observer_fn;
@@ -131,10 +142,10 @@ void gate_close(xGate_tt * g){
 	uint8_t is_detected_s1 = sensor_is_detected(s1);
 	uint8_t is_detected_s2 = sensor_is_detected(s2);
 	if(!is_detected_s1){
-		motor_forward(m1, dom_pwm_full());
+		motor_forward(m1, gate_speed(g->id));
 	}
 	if(!is_detected_s2){
-		motor_forward(m2, dom_pwm_full());
+		motor_forward(m2, gate_speed(g->id));
 	}
 	if(!is_detected_s1 || !is_detected_s2){
 		gate_change(g->id, GATE_STATE_ClOSING);
@@ -154,7 +165,7 @@ void gate_open(xGate_tt * g){
 //			motor_back(m1, dom_pwm_full());
 //		else // если подходим к границе
 //			motor_back(m1, dom_pwm_break());
-		motor_back(m1, dom_pwm_full());
+		motor_back(m1, gate_speed(g->id));
 	}
 	if(!is_detected_s2){
 //		// если в середине движения
@@ -162,7 +173,7 @@ void gate_open(xGate_tt * g){
 //			motor_back(m2, dom_pwm_full());
 //		else// если подходим к границе
 //			motor_back(m2, dom_pwm_break());
-		motor_back(m2, dom_pwm_full());
+		motor_back(m2, gate_speed(g->id));
 	}
 	if(!is_detected_s1 || !is_detected_s2){
 		gate_change(g->id, GATE_STATE_OPENING);
@@ -244,10 +255,10 @@ void gate_leaf_2_stop(xGate_tt * g){
 
 void on_ckick_button(uint8_t id){
 	switch(id){
-		case BUTTON_1: gate_states[gates[GATE_1].state].on_click_close(&gates[GATE_1]); break;
-		case BUTTON_2: gate_states[gates[GATE_1].state].on_click_open(&gates[GATE_1]);  break;
-		case BUTTON_3: gate_states[gates[GATE_2].state].on_click_close(&gates[GATE_2]); break;
-		case BUTTON_4: gate_states[gates[GATE_2].state].on_click_open(&gates[GATE_2]);	break;
+		case BUTTON_1: gate_states[gates[GATE_1].state].on_click_close(&gates[GATE_1]);  gates[GATE_1].angle = -1; break;
+		case BUTTON_2: gate_states[gates[GATE_1].state].on_click_open(&gates[GATE_1]);   gates[GATE_1].angle = -1; break;
+		case BUTTON_3: gate_states[gates[GATE_2].state].on_click_close(&gates[GATE_2]);  gates[GATE_2].angle = -1; break;
+		case BUTTON_4: gate_states[gates[GATE_2].state].on_click_open(&gates[GATE_2]);	 gates[GATE_2].angle = -1; break;
 		default: break;
 	}
 }
@@ -273,7 +284,8 @@ void on_sensor_rain_detected(uint8_t id){
 	if(id == SENSOR_RAIN_1){
 		if(dom_sensor_rain_is_detected(SENSOR_RAIN_1)){
 			dom_led_on(LED_RAIN);
-			dome_close();
+			dome_open(GATE_1, 0);
+			dome_open(GATE_2, 0);
 		}
 		else{
 			dom_led_off(LED_RAIN);
@@ -281,17 +293,63 @@ void on_sensor_rain_detected(uint8_t id){
 	}
 }
 
-void dome_close(){
-	gate_close(&gates[GATE_1]);
-	gate_close(&gates[GATE_2]);
+
+void gate_poll(uint8_t id){
+	uint16_t deg = dome_encoder(id);
+	if(~gates[id].angle){
+		if(gates[id].state == GATE_STATE_ClOSING){
+			if(deg >= gates[id].angle){
+				gate_stop(&gates[id]);
+			}
+		}
+		if(gates[id].state == GATE_STATE_OPENING){
+			if(deg <=  gates[id].angle){
+				gate_stop(&gates[id]);
+			}
+		}
+	}
+
+	motor_speed_set(get_motor(gates[id].mid[0]), gate_speed(id));
+	motor_speed_set(get_motor(gates[id].mid[1]), gate_speed(id));
 }
+
+void dome_poll(){
+	gate_poll(GATE_1);
+	gate_poll(GATE_2);
+}
+
+//void dome_close(){
+//	gates[0].angle = -1;
+//	gates[1].angle = -1;
+//	gate_close(&gates[GATE_1]);
+//	gate_close(&gates[GATE_2]);
+//}
+
+
 void dome_open(uint8_t id, uint16_t angle){
-	if(angle >= 90){
+
+	uint16_t deg = dome_encoder(id);
+	uint16_t need_deg = 90 - angle;
+
+	gates[id].angle = -1;
+
+	if(need_deg == 0){
 		gate_open(&gates[id]);
 	}
+	else if(need_deg == 90){
+		gate_close(&gates[id]);
+	}
 	else{
-		//TODO
-		gate_open(&gates[id]);
+		if(deg == need_deg){
+			return;
+		}
+		gates[id].angle = need_deg;
+		if(deg > need_deg ){
+			gate_open(&gates[id]);
+		}
+		else{
+			gate_close(&gates[id]);
+		}
 	}
 }
 void dome_stop(){
@@ -355,7 +413,15 @@ uint16_t dome_deg_speed(uint8_t id){
 
 uint8_t dome_move_params_set(uint16_t pwm_break, uint16_t pwm_full, uint16_t accel, uint16_t angle_break, float koef1, float koef2, uint8_t rain_inf){
 	// TODO
-	return dom_move_params_set(pwm_break, pwm_full, accel, angle_break, koef1, koef2, rain_inf);
+	uint8_t result = dom_move_params_set(pwm_break, pwm_full, accel, angle_break, koef1, koef2, rain_inf);
+
+	motor_speed_set(get_motor(gates[0].mid[0]), gate_speed(0));
+	motor_speed_set(get_motor(gates[0].mid[1]), gate_speed(0));
+
+	motor_speed_set(get_motor(gates[1].mid[0]), gate_speed(1));
+	motor_speed_set(get_motor(gates[1].mid[1]), gate_speed(1));
+
+	return result;
 }
 
 
