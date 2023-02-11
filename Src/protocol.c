@@ -106,15 +106,15 @@ void protocol_parser(uint8_t * buf, uint16_t len){
 
 void handler_cmd_status(uint8_t * params, uint16_t len){
 	sprintf(tx_buffer, "STATUS%d,%d,%d,%d,0,0,0,0,0,0,%d,%d,%d,%d,%d",
-			dome_status(0),
-			dome_state(1),
-			dome_encoder(0),
-			dome_encoder(1),
-			dom_rele_is_active(0),
-			dom_rele_is_active(1),
-			dom_rele_is_active(2),
-			dom_sensor_rain_is_enable(0),
-			dom_sensor_rain_is_detected(0)
+			dome_status(GATE_1),
+			dome_status(GATE_2),
+			dome_encoder(GATE_1),
+			dome_encoder(GATE_2),
+			dom_rele_is_active(RELE_1),
+			dom_rele_is_active(RELE_2),
+			dom_rele_is_active(RELE_3),
+			dom_sensor_rain_is_enable(SENSOR_RAIN_1),
+			dom_sensor_rain_is_detected(SENSOR_RAIN_1)
 			);
 	sender(tx_buffer, strlen(tx_buffer));
 }
