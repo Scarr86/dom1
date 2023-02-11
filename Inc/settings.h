@@ -41,7 +41,6 @@ typedef struct{
 }xSensor_rain_settings_tt;
 
 typedef struct{
-	uint16_t speed;
 	uint16_t deg_speed;
 }xMotor_settings_tt;
 

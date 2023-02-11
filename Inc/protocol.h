@@ -13,11 +13,11 @@
 
 typedef struct{
 	void (*handler)(uint8_t * params, uint16_t len);
-	uint8_t * cmd;
+	char * cmd;
 }xCmd_tt;
 
 
-typedef uint8_t (*protocol_sender_tt)(uint8_t*, uint16_t);
+typedef uint8_t (*protocol_sender_tt)(char*, uint16_t);
 
 void protocol_init(protocol_sender_tt protocol_sender);
 void protocol_parser(uint8_t * buf, uint16_t len);

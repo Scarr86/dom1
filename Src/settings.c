@@ -18,7 +18,7 @@ void flash_erase(){
 }
 uint16_t flash_write(void * data, uint32_t len){
 	uint8_t * d = (uint8_t*)data;
-	uint16_t result;
+	uint16_t result = HAL_OK;
 	flash_erase();
 
 	HAL_FLASH_Unlock();

@@ -28,7 +28,7 @@ const char * help = "\r\n/h - help\r\n"
 		"\t 'o' - state all or [id] odometer\r\n"
 		"\t 'l' - state led\r\n"
 		"\t 'g' - state gate all or [id]\r\n"
-		"/m id option [speed, deg_speed, ...] - settings and control motor\r\n"
+		"/m id option [speed, min_speed, deg_speed, ...] - settings and control motor\r\n"
 		"option:\r\n"
 		"\t '=' - set [speed, ...]\r\n"
 		"\t '>' - turn forward\r\n"
@@ -127,6 +127,8 @@ void cli_cmd_parser(uint8_t * cmd){
 				cli_cmd_parser(tbuf);
 				sprintf(tbuf, "? m");
 				cli_cmd_parser(tbuf);
+				sprintf(tbuf, "? g");
+				cli_cmd_parser(tbuf);
 				sprintf(tbuf, "? l");
 				cli_cmd_parser(tbuf);
 				return;
@@ -143,10 +145,10 @@ void cli_cmd_parser(uint8_t * cmd){
 					parser_btn(atoi(p), NULL);
 				break;
 				case 'l':
-					slen = sprintf(cbuf, "\r\nLED"
+					slen = sprintf(cbuf, "\r\n-LED-"
 							"\r\nblink: %s"
 							"\r\nstate: %s"
-							"\r\nfrq: %d", dom_led_pwm_mode() ? "on" : "off", dom_led_pwm_state() ? "on" : "off", dom_led_pwm_frq() );
+							"\r\nfrq: %d\r\n", dom_led_pwm_mode() ? "on" : "off", dom_led_pwm_state() ? "on" : "off", dom_led_pwm_frq() );
 					sender(cbuf, slen);
 				break;
 				case 's':
@@ -158,9 +160,9 @@ void cli_cmd_parser(uint8_t * cmd){
 						}
 						return;
 					}
-					slen = sprintf(cbuf, "\r\nSENSOR %d\r\n"
+					slen = sprintf(cbuf, "\r\n-SENSOR [%d]-\r\n"
 													"state: %d\r\n"
-													"cmpVal: %d", atoi(p),
+													"cmpVal: %d\r\n", atoi(p),
 													dom_sensor_state(atoi(p)),
 													dom_sensor_cmp_val(atoi(p)));
 					sender(cbuf, slen);
@@ -181,16 +183,23 @@ void cli_cmd_parser(uint8_t * cmd){
 						return;
 					}
 					id -= 1;
-					slen = sprintf(cbuf, "\r\nMOTOR %d\r\n"
+					slen = sprintf(cbuf, "\r\n-MOTOR [%d]-\r\n"
 							"state: %d\r\n"
+							"dir: %d\r\n"
 							"speed: %d\r\n"
-							"deg_speed: %d\r\n"
-							"dir: %d",
+							"deg: %d\r\n"
+							"deg_speed_set / deg_speed: %lu / %lu\r\n"
+							"dist / pos: %ld / %ld\r\n"
+							"pos_0 / pos_90: %ld / %ld\r\n",
 							id + 1,
 							dom_motor_state(id),
+							dom_motor_dir(id),
 							dom_motor_speed(id),
-							dom_motor_deg_speed(id),
-							dom_motor_dir(id));
+							dom_motor_deg(id),
+							dom_motor_deg_speed(id), motor_deg_speed(get_motor(id)),
+							dom_motor_dist(id), dom_motor_pos(id),
+							dom_motor_pos_0(id), dom_motor_pos_90(id)
+							);
 					sender(cbuf, slen);
 				break;
 				case 'g':
@@ -209,20 +218,20 @@ void cli_cmd_parser(uint8_t * cmd){
 						return;
 					}
 					id -= 1;
-					slen = sprintf(cbuf, "\r\nGATE %d\r\n"
+					slen = sprintf(cbuf, "\r\n-GATE [%d]-\r\n"
 							"state: %s\r\n"
-							"dist_1: %lu\r\n"
-							"deg_1: %lu\r\n"
-							"dist_2: %lu\r\n"
-							"deg_2: %lu",
+							"dist / pos: %ld / %ld\r\n"
+							"deg_speed_set / deg_speed: %lu / %lu\r\n"
+							"deg: %d\r\n",
 							id + 1,
-							get_gate(id)->state == GATE_STATE_STOP ? "STOP":
-									get_gate(id)->state == GATE_STATE_ClOSING ? "ClOSING" : "OPENING",
-							dom_motor_dist(get_gate(id)->mid[0]),
-							dom_motor_deg(get_gate(id)->mid[0]),
-							dom_motor_dist(get_gate(id)->mid[1]),
-							dom_motor_deg(get_gate(id)->mid[1])
-											);
+							dome_state(id) == GATE_STATE_STOP ? "STOP":
+									dome_state(id) == GATE_STATE_ClOSING ? "ClOSING" : "OPENING",
+							dome_dist(id),
+							dome_pos(id),
+							(dom_motor_deg_speed(get_gate(id)->mid[0]) + dom_motor_deg_speed(get_gate(id)->mid[1])) / 2,
+							dome_deg_speed(id),
+							dome_encoder(id)
+							);
 					sender(cbuf, slen);
 
 				break;
@@ -241,8 +250,8 @@ void cli_cmd_parser(uint8_t * cmd){
 						sender(cbuf, slen);
 					}
 					else{
-						slen = sprintf(cbuf, "\r\nODOMETER %d\r\n"
-								"value: %lu", id, dom_odometer_value(id - 1) );
+						slen = sprintf(cbuf, "\r\n-ODOMETER [%d]-\r\n"
+								"value: %lu\r\n", id, dom_odometer_value(id - 1) );
 						sender(cbuf, slen);
 					}
 				break;
@@ -312,10 +321,10 @@ void cli_cmd_parser(uint8_t * cmd){
 			}
 			switch(*p){
 				case '>':
-					dom_motor_forward(id);
+					dom_motor_forward(id, dom_pwm_full());
 				break;
 				case '<':
-					dom_motor_back(id);
+					dom_motor_back(id, dom_pwm_full());
 				break;
 				case '*':
 					dom_motor_stop(id);
@@ -326,7 +335,7 @@ void cli_cmd_parser(uint8_t * cmd){
 						param[iparam] = atoi(p);
 						++iparam;
 					}
-					result = dom_motor_set(id, param[0], param[1]);
+					result = dom_motor_set(id, param[0], param[1], param[2]);
 					slen = sprintf(cbuf, "\n%s", result > 0 ? "fail" : "done");
 					sender(cbuf, slen);
 				break;
@@ -379,9 +388,9 @@ void parser_btn(uint8_t id, uint8_t * p){
 		return;
 	}
 	if(p == NULL){
-		slen = sprintf(cbuf, "\r\nBUTTON %d"
+		slen = sprintf(cbuf, "\r\n-BUTTON [%d]-"
 				"\r\nstate: %d"
-				"\r\ndebounceTime: %d", id, dom_btn_state(id), dom_btn_debounce_time(id));
+				"\r\ndebounceTime: %d\r\n", id, dom_btn_state(id), dom_btn_debounce_time(id));
 		sender(cbuf, slen);
 		return;
 	}

@@ -23,7 +23,6 @@
 
 #define BUTTON_DEBOUNCE_TIME_DEF (200)
 #define SENSOR_CMP_VAL_DEF (1)
-#define MOTOR_SPEED_DEF (250)
 #define MOTOR_DEG_SPEED_DEF (115)
 #define SENSOR_RAIN_ENABLE_DEF (1)
 #define SENSOR_RAIN_CMP_VAL_DEF (1)
@@ -182,17 +181,23 @@ void dom_sensor_rain_1_on_change();
 // MOTOR START
 int8_t dom_motor_state(uint8_t id);
 int16_t dom_motor_speed(uint8_t id);
+// возращает установленное значение
 int16_t dom_motor_deg_speed(uint8_t id);
 int8_t dom_motor_dir(uint8_t id);
-uint8_t dom_motor_set(uint8_t id, int16_t speed, int16_t deg_speed);
-void dom_motor_forward(uint8_t id);
-void dom_motor_back(uint8_t id);
+uint8_t dom_motor_set(uint8_t id, int16_t speed, int16_t min_speed, int16_t deg_speed);
+void dom_motor_forward(uint8_t id, uint16_t speed);
+void dom_motor_back(uint8_t id, uint16_t speed);
 void dom_motor_stop(uint8_t id);
-uint32_t dom_motor_dist(uint8_t id);
-uint32_t dom_motor_deg(uint8_t id);
-//void dom_motor_dist_clear(uint8_t id);
-//void dom_motor_dist_start(uint8_t id);
-//void dom_motor_dist_stop(uint8_t id);
+int32_t dom_motor_pos(uint8_t id);
+uint16_t dom_motor_deg(uint8_t id);
+
+void dom_motor_save_pos_0(uint8_t id);
+void dom_motor_save_pos_90(uint8_t id);
+
+int32_t dom_motor_pos_0(uint8_t id);
+int32_t dom_motor_pos_90(uint8_t id);
+
+int32_t dom_motor_dist(uint8_t id);
 
 // MOTOR END
 
@@ -219,10 +224,7 @@ uint16_t dom_pwm_break();
 uint16_t dom_pwm_full();
 uint16_t dom_pwm_accel();
 uint16_t dom_angle_break();
-uint8_t dom_pwm_break_set(uint16_t val);
-uint8_t dom_pwm_full_set(uint16_t val);
-uint8_t dom_pwm_accel_set(uint16_t val);
-uint8_t dom_angle_break_set(uint16_t val);
+uint8_t dom_move_params_set(uint16_t pwm_break, uint16_t pwm_full, uint16_t accel, uint16_t angle_break, float koef1, float koef2, uint8_t rain_inf);
 // MOVE PARAMS END
 
 

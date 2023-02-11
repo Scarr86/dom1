@@ -7,7 +7,8 @@
 
 
 #include "protocol.h"
-
+#include "string.h"
+#include "stdio.h"
 #define PROTOCOL_BUF_SIZE (1000)
 static uint8_t buffer[PROTOCOL_BUF_SIZE];
 static uint8_t tx_buffer[PROTOCOL_BUF_SIZE];
@@ -68,9 +69,9 @@ xCmd_tt cmds[] = {
 
 static protocol_sender_tt sender;
 
-static uint8_t def_sender(uint8_t * buf, uint16_t len);
+static uint8_t def_sender(char * buf, uint16_t len);
 
-uint8_t def_sender(uint8_t * buf, uint16_t len){
+uint8_t def_sender(char * buf, uint16_t len){
 
 }
 
@@ -105,7 +106,7 @@ void protocol_parser(uint8_t * buf, uint16_t len){
 
 void handler_cmd_status(uint8_t * params, uint16_t len){
 	sprintf(tx_buffer, "STATUS%d,%d,%d,%d,0,0,0,0,0,0,%d,%d,%d,%d,%d",
-			dome_state(0),
+			dome_status(0),
 			dome_state(1),
 			dome_encoder(0),
 			dome_encoder(1),
@@ -209,71 +210,28 @@ void handler_cmd_get_move_params(uint8_t * params, uint16_t len){
 	sender(tx_buffer, strlen(tx_buffer));
 }
 void handler_cmd_set_move_params(uint8_t * params, uint16_t len){
-	uint16_t val;
+	uint16_t val[7];
 	char * p = strtok(params, sep);
+	uint8_t i = 1;
+
 	if(p){
-		val = atoi(p);
-		if(dom_pwm_break_set(val)){
-			sender(error_str, strlen(error_str));
-			return;
-		}
-	}
-	else{
-		sender(error_str, strlen(error_str));
-		return;
-	}
-	p = strtok(NULL, sep);
-	if(p){
-		val = atoi(p);
-		if(dom_pwm_full_set(val)){
-			sender(error_str, strlen(error_str));
-			return;
-		}
-	}
-	else{
-		sender(error_str, strlen(error_str));
-		return;
+		val[0] = atoi(p);
 	}
 
-	p = strtok(NULL, sep);
-	if(p){
-		val = atoi(p);
-		if(dom_pwm_accel_set(val)){
+	while(p){
+		p = strtok(NULL, sep);
+		val[i] = atoi(p);
+		i += 1;
+	}
+	if(i == sizeof val){
+		if(dome_move_params_set(val[0], val[1], val[2], val[3], val[4], val[5], val[6])){
+			sender("OK\r\n", 4);
+		}
+		else{
 			sender(error_str, strlen(error_str));
-			return;
 		}
 	}
 	else{
 		sender(error_str, strlen(error_str));
-		return;
 	}
-
-	p = strtok(NULL, sep);
-	if(p){
-		val = atoi(p);
-		if(dom_angle_break_set(val)){
-			sender(error_str, strlen(error_str));
-			return;
-		}
-	}
-	else{
-		sender(error_str, strlen(error_str));
-		return;
-	}
-	p = strtok(NULL, sep);
-	p = strtok(NULL, sep);
-	p = strtok(NULL, sep);
-	if(p){
-		val = atoi(p);
-		if(dom_sensor_rain_set(0, -1, val)){
-			sender(error_str, strlen(error_str));
-			return;
-		}
-	}
-	else{
-		sender(error_str, strlen(error_str));
-		return;
-	}
-
-	sender("OK\r\n", 4);
 }
