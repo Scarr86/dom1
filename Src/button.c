@@ -35,6 +35,7 @@ uint8_t btn_state(xButton_tt * btn){
 	if(ps == GPIO_PIN_RESET){
 		return 0;
 	}
+
 	if(ps == GPIO_PIN_SET){
 		return 1;
 	}
