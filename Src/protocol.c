@@ -105,7 +105,7 @@ void protocol_parser(uint8_t * buf, uint16_t len){
 }
 
 void handler_cmd_status(uint8_t * params, uint16_t len){
-	sprintf(tx_buffer, "STATUS%d,%d,%d,%d,0,0,0,0,0,0,%d,%d,%d,%d,%d",
+	sprintf(tx_buffer, "STATUS%d,%d,%d,%d,0,0,0,0,0,0,%d,%d,%d,%d,%d\r",
 			dome_status(GATE_1),
 			dome_status(GATE_2),
 			dome_encoder(GATE_1),
@@ -121,17 +121,17 @@ void handler_cmd_status(uint8_t * params, uint16_t len){
 
 void handler_cmd_stop_dome(uint8_t * params, uint16_t len){
 	dome_stop();
-	sender("OK\r\n", 4);
+	sender("OK\r", 4);
 }
 void handler_cmd_open_dome(uint8_t * params, uint16_t len){
 	dome_open(GATE_1, 90);
 	dome_open(GATE_2, 90);
-	sender("OK\r\n", 4);
+	sender("OK\r", 4);
 }
 void handler_cmd_close_dome(uint8_t * params, uint16_t len){
 	dome_open(GATE_1, 0);
 	dome_open(GATE_2, 0);
-	sender("OK\r\n", 4);
+	sender("OK\r", 4);
 }
 
 void handler_cmd_shutter_move_deg(uint8_t * params, uint16_t len){
@@ -155,7 +155,7 @@ void handler_cmd_shutter_move_deg(uint8_t * params, uint16_t len){
 	}
 	dome_open(n, angle);
 
-	sender("OK\r\n", 4);
+	sender("OK\r", 4);
 }
 void handler_cmd_switch_toggle(uint8_t * params, uint16_t len){
 	uint8_t n, on;
@@ -182,7 +182,7 @@ void handler_cmd_switch_toggle(uint8_t * params, uint16_t len){
 	else{
 		dom_rele_inactive(n - 1);
 	}
-	sender("OK\r\n", 4);
+	sender("OK\r", 4);
 }
 void handler_cmd_arm_rain(uint8_t * params, uint16_t len){
 	uint8_t on;
@@ -197,10 +197,10 @@ void handler_cmd_arm_rain(uint8_t * params, uint16_t len){
 
 	dom_sensor_rain_set(0, on, -1);
 
-	sender("OK\r\n", 4);
+	sender("OK\n", 4);
 }
 void handler_cmd_get_move_params(uint8_t * params, uint16_t len){
-	sprintf(tx_buffer, "MOVEPARAMS%d,%d,%d,%d,%.2f,%.2f,%d",
+	sprintf(tx_buffer, "MOVEPARAMS%d,%d,%d,%d,%.2f,%.2f,%d\r",
 			dom_pwm_break(),
 			dom_pwm_full(),
 			dom_pwm_accel(),
@@ -226,7 +226,7 @@ void handler_cmd_set_move_params(uint8_t * params, uint16_t len){
 	}
 	if(i == sizeof val){
 		if(dome_move_params_set(val[0], val[1], val[2], val[3], val[4], val[5], val[6])){
-			sender("OK\r\n", 4);
+			sender("OK\r", 4);
 		}
 		else{
 			sender(error_str, strlen(error_str));

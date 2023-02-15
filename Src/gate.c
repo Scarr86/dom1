@@ -412,7 +412,6 @@ uint16_t dome_deg_speed(uint8_t id){
 }
 
 uint8_t dome_move_params_set(uint16_t pwm_break, uint16_t pwm_full, uint16_t accel, uint16_t angle_break, float koef1, float koef2, uint8_t rain_inf){
-	// TODO
 	uint8_t result = dom_move_params_set(pwm_break, pwm_full, accel, angle_break, koef1, koef2, rain_inf);
 
 	motor_speed_set(get_motor(gates[0].mid[0]), gate_speed(0));
