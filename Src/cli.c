@@ -88,8 +88,9 @@ void cli_parser(uint8_t * buf, uint16_t len){
 			char * cmd_start = memchr(cbuf, '/', line_feed - cbuf );
 			if(cmd_start){
 				cli_cmd_parser(cmd_start + 1 );
+				sender("\r\n", 2);
 			}
-			sender("\r\n", 2);
+
 			cbuf_len -= line_feed + 1 - cbuf;
 			memcpy(cbuf, line_feed + 1, cbuf_len);
 		}
