@@ -263,6 +263,7 @@ void cli_cmd_parser(uint8_t * cmd){
 			}
 
 		break;
+//=======================================
 		case 'b':
 			p = strtok(NULL, sep);// read id
 			id = atoi(p);
