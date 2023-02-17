@@ -19,6 +19,7 @@ typedef struct xTimer{
 	uint32_t start;
 	uint32_t interval;
 	void * thisArg;
+	uint8_t is_running;
 	on_timeout_fn on_timeout;
 }xTimer_tt;
 
@@ -34,6 +35,7 @@ void timer_stop(xTimer_tt * t);
 uint8_t timer_expired(xTimer_tt * t);
 uint8_t timers_poll();
 uint32_t timer_remaining(xTimer_tt * t);
+uint8_t timer_is_running(xTimer_tt * t);
 //uint8_t timer_poll(xTimer_tt * t);
 
 #endif /* TIMER_H_ */

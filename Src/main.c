@@ -125,6 +125,8 @@ int main(void)
   dom_init();
   gate_init();
 
+  //get_button(BUTTON_1)->on_click(); // todo debug
+
 
 
 

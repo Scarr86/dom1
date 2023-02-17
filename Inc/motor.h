@@ -27,6 +27,7 @@ typedef struct{
 	uint32_t pin;
 	uint32_t ccr;
 	uint16_t speed;
+	uint16_t cur_speed;
 	uint16_t deg_speed;
 	uint8_t state;
 	int32_t pos;
@@ -58,8 +59,10 @@ int32_t motor_pos(xMotor_tt * m);
 void motor_pos_clear(xMotor_tt * m);
 void motor_pos_start(xMotor_tt * m, void(*calc_pos)(xTimer_tt * t, void * thisArg));
 void motor_pos_stop(xMotor_tt * m);
+void motor_pos_adjust(xMotor_tt * m);
 void calc_pos_inc(xTimer_tt * t, void * thisArg);
 void calc_pos_dec(xTimer_tt * t, void * thisArg);
+
 
 //void accel_inc(xTimer_tt * t, void * thisArg);
 //void accel_dec(xTimer_tt * t, void * thisArg);

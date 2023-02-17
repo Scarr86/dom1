@@ -23,7 +23,7 @@ void timer_add(xTimer_tt * timer){
 		if(t == timer)
 			return;
 	}
-
+	timer->is_running = 1;
 	timer->next = timerlist;
 	timerlist = timer;
 }
@@ -41,6 +41,7 @@ void timer_del(xTimer_tt * timer){
 		}
 	}
 	timer->next = NULL;
+	timer->is_running = 0;
 }
 
 void timer_request_poll(void){
@@ -96,4 +97,8 @@ uint8_t timer_expired(xTimer_tt * t){
 
 uint32_t timer_remaining(xTimer_tt * t){
 	return t->start + t->interval - HAL_GetTick();
+}
+
+uint8_t timer_is_running(xTimer_tt * t){
+	return t->is_running;
 }

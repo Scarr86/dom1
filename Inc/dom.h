@@ -23,6 +23,7 @@
 
 #define BUTTON_DEBOUNCE_TIME_DEF (200)
 #define SENSOR_CMP_VAL_DEF (1)
+//#define SENSOR_CMP_VAL_DEF (0) // todo debug
 #define MOTOR_DEG_SPEED_DEF (115)
 #define SENSOR_RAIN_ENABLE_DEF (1)
 #define SENSOR_RAIN_CMP_VAL_DEF (1)

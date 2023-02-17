@@ -196,6 +196,7 @@ void dom_init(){
 	//settings_is_valid  = 0;
 
 	if(!settings_is_valid){
+	//{ // todo debug
 		dom_settings.pwm_break = PWM_BREAK_DEF;
 		dom_settings.pwm_full = PWM_FULL_DEF;
 		dom_settings.pwm_accel = PWM_ACCEL_DEF;

@@ -100,6 +100,8 @@ void gate_init(){
 	dom_btn_subscribe(on_ckick_button);
 	dom_sensor_subscribe(on_sensor_detected);
 	dom_sensor_rain_subscribe(on_sensor_rain_detected);
+	gates[GATE_1].angle = -1;
+	gates[GATE_2].angle = -1;
 }
 
 xGate_tt * get_gate(GATE_ENUM id){
@@ -377,7 +379,7 @@ uint8_t dome_status(uint8_t id){
 }
 //возращает угол закрытия верхней створки
 uint8_t dome_encoder(uint8_t id){
-	return dom_motor_deg(gates[id].mid[0]) + dom_motor_deg(gates[id].mid[1]);
+	return (dom_motor_deg(gates[id].mid[0]) + dom_motor_deg(gates[id].mid[1])) / 2;
 }
 float dome_koef(uint8_t id){
 	//TODO
