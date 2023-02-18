@@ -59,4 +59,16 @@ SETMOVEPARAMS<pwm_break>,<pwm_full>,<pwm_accel>,<angle_break>,<0>,<0>,<RainInf> 
 <RainInf> - установка срабатывания датчика дождя. 1 – срабатывание при высоком
 логическом уровне. 1 - срабатывание при низком логическом уровне.
 
+
+
+GETTLM - прочитать телеметрию купола
+Ответ:
+TLM<sensor>,<odometr1>,<odometr2>,<odometr3>,<odometr4>
+<sensor>, - состояние датчиков - десятичное число представляющий битовое состояние:с1с2с3с4о1о2о3о4
+c1 - старший бит - состояние дачика close1, где 0-датчик не сработал 1 - датчик сработал
+o4 - младший бит - состояние дачика open1    
+<odometr> - число счетчика оборотов мотора  
+
+
+
 The float formatting support is not enabled, check your MCU Settings from "Project Properties > C/C++ Build > Settings > Tool Settings", or add manually "-u _printf_float" in linker flags.
