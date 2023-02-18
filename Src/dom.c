@@ -243,8 +243,13 @@ void dom_init(){
 
 
 
+	for(uint8_t i = 0; i < 5; ++i ){
+		led_pwm_off(&led_pwm);
+		HAL_Delay(300);
+		led_pwm_on(&led_pwm);
+		HAL_Delay(300);
+	}
 
-	led_pwm_on(&led_pwm);
 	//motor_forward(&motor[MOTOR_5]);
 	//led_pwm_blink(&led_pwm, 4);
 }
