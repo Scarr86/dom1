@@ -54,7 +54,7 @@ int8_t motor_dir(xMotor_tt *m);
 uint8_t motor_state(xMotor_tt * m);
 
 
-uint16_t motor_deg(xMotor_tt * m);
+int16_t motor_deg(xMotor_tt * m);
 int32_t motor_pos(xMotor_tt * m);
 void motor_pos_clear(xMotor_tt * m);
 void motor_pos_start(xMotor_tt * m, void(*calc_pos)(xTimer_tt * t, void * thisArg));

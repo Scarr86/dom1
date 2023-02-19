@@ -112,8 +112,12 @@ xGate_tt * get_gate(GATE_ENUM id){
 
 
 uint16_t gate_speed(uint8_t id){
-	uint16_t deg = dome_encoder(id);
+	int16_t deg = dome_encoder(id);
 	uint16_t speed = 0;
+
+	if(deg == -1)
+		return dom_pwm_break();
+
 	if(gates[id].state == GATE_STATE_ClOSING){
 		if(deg < (90 - dom_angle_break())){
 			speed = dom_pwm_full();
@@ -409,7 +413,7 @@ uint8_t dome_status(uint8_t id){
 	return 3;
 }
 //возращает угол закрытия верхней створки
-uint8_t dome_encoder(uint8_t id){
+int8_t dome_encoder(uint8_t id){
 	return (dom_motor_deg(gates[id].mid[0]) + dom_motor_deg(gates[id].mid[1])) / 2;
 }
 float dome_koef(uint8_t id){

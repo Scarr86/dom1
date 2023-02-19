@@ -131,7 +131,7 @@ int8_t motor_dir(xMotor_tt *m){
 uint8_t motor_state(xMotor_tt * m){
 	return m->state;
 }
-uint16_t motor_deg(xMotor_tt * m){
+int16_t motor_deg(xMotor_tt * m){
 
 	if(m->is_pos_0 && m->is_pos_90){
 		return ((m->pos - m->pos_0) * 90) / motor_dist(m);
@@ -143,7 +143,7 @@ uint16_t motor_deg(xMotor_tt * m){
 		return 90 - (((m->pos_90 - m->pos) / m->deg_speed) / (1000 / DIST_TIMER_GAP));
 	}
 	else{
-		return 0;
+		return -1;
 	}
 }
 int32_t motor_pos(xMotor_tt * m){

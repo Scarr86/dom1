@@ -70,7 +70,7 @@ uint8_t dome_state(uint8_t id);
 uint8_t dome_status(uint8_t id);
 
 //возращает угол закрытия верхней створки
-uint8_t dome_encoder(uint8_t id);
+int8_t dome_encoder(uint8_t id);
 
 float dome_koef(uint8_t id);
 

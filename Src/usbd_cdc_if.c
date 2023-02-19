@@ -99,8 +99,6 @@ uint8_t rx_buf[APP_RX_DATA_SIZE];
 uint8_t tx_buf[APP_TX_DATA_SIZE];
 uint16_t rx_len;
 uint16_t tx_len;
-uint8_t rx_lock;
-uint8_t tx_lock;
 
 static uint8_t observer_count;
 static usb_observers_tt observers[4];

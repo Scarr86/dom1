@@ -558,7 +558,7 @@ void dom_motor_stop(uint8_t id){
 int32_t dom_motor_pos(uint8_t id){
 	return motor_pos(&motor[id]);
 }
-uint16_t dom_motor_deg(uint8_t id){
+int16_t dom_motor_deg(uint8_t id){
 	return motor_deg(&motor[id]);
 }
 //void dom_motor_dist_clear(uint8_t id){
