@@ -229,18 +229,20 @@ void handler_cmd_get_move_params(uint8_t * params, uint16_t len){
 void handler_cmd_set_move_params(uint8_t * params, uint16_t len){
 	uint16_t val[7];
 	char * p = strtok(params, sep);
-	uint8_t i = 1;
+	uint8_t i = 0;
 
 	if(p){
 		val[0] = atoi(p);
 	}
 
-	while(p){
+	while(1){
 		p = strtok(NULL, sep);
-		val[i] = atoi(p);
+		if(p == NULL)
+			break;
 		i += 1;
+		val[i] = atoi(p);
 	}
-	if(i == sizeof val){
+	if(i == sizeof val / 2){
 		if(dome_move_params_set(val[0], val[1], val[2], val[3], val[4], val[5], val[6])){
 			sender("OK\r", 4);
 		}
