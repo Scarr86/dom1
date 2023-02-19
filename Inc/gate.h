@@ -29,6 +29,7 @@ typedef struct{
 	GATE_STATE_ENUM state;
 	float koef;
 	int16_t angle;
+	uint16_t speed;
 }xGate_tt;
 
 

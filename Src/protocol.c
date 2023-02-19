@@ -26,6 +26,18 @@ void handler_cmd_switch_toggle(uint8_t * params, uint16_t len);
 void handler_cmd_arm_rain(uint8_t * params, uint16_t len);
 void handler_cmd_get_move_params(uint8_t * params, uint16_t len);
 void handler_cmd_set_move_params(uint8_t * params, uint16_t len);
+void handler_cmd_gettlm(uint8_t * params, uint16_t len);
+
+typedef struct sTlm{
+	uint8_t c1:1;
+	uint8_t c2:1;
+	uint8_t c3:1;
+	uint8_t c4:1;
+	uint8_t o1:1;
+	uint8_t o2:1;
+	uint8_t o3:1;
+	uint8_t o4:1;
+}xTlm_tt;
 
 xCmd_tt cmds[] = {
 		{
@@ -64,6 +76,10 @@ xCmd_tt cmds[] = {
 				.cmd = "SETMOVEPARAMS",
 				.handler = handler_cmd_set_move_params
 		},
+		{
+				.cmd = "GETTLM",
+				.handler = handler_cmd_gettlm
+		}
 };
 
 
@@ -235,4 +251,29 @@ void handler_cmd_set_move_params(uint8_t * params, uint16_t len){
 	else{
 		sender(error_str, strlen(error_str));
 	}
+}
+
+void handler_cmd_gettlm(uint8_t * params, uint16_t len){
+
+	xTlm_tt sensor;
+
+	sensor.c1 = dom_sensor_is_detected(SENSOR_1);
+	sensor.c2 = dom_sensor_is_detected(SENSOR_3);
+	sensor.c3 = dom_sensor_is_detected(SENSOR_5);
+	sensor.c4 = dom_sensor_is_detected(SENSOR_7);
+
+	sensor.o1 = dom_sensor_is_detected(SENSOR_2);
+	sensor.o1 = dom_sensor_is_detected(SENSOR_4);
+	sensor.o1 = dom_sensor_is_detected(SENSOR_6);
+	sensor.o1 = dom_sensor_is_detected(SENSOR_8);
+
+	uint8_t s = *((uint8_t*)&sensor);
+
+	sprintf(tx_buffer, "TLM%d,%ld,%ld,%ld,%ld\r",
+			s,
+			dom_odometer_value(0),
+			dom_odometer_value(1),
+			dom_odometer_value(2),
+			dom_odometer_value(3));
+	sender(tx_buffer, strlen(tx_buffer));
 }

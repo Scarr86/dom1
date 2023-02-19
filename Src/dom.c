@@ -427,6 +427,9 @@ int8_t dom_sensor_cmp_val(uint8_t id){
 	}
 	return sensor_cmp_val(&sensor[id - 1]);
 }
+int8_t dom_sensor_is_detected(uint8_t id){
+	return sensor_is_detected(&sensor[id]);
+}
 void dom_sensor_1_on_detected(){
 	dom_sensor_notify(SENSOR_1);
 }

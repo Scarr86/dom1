@@ -157,6 +157,7 @@ uint8_t dom_sensor_subscribe(sensor_observers_fn obs);
 uint8_t dom_sensor_notify(uint8_t indx);
 int8_t dom_sensor_state(uint8_t id);
 int8_t dom_sensor_cmp_val(uint8_t id);
+int8_t dom_sensor_is_detected(uint8_t id);
 void dom_sensor_1_on_detected();
 void dom_sensor_2_on_detected();
 void dom_sensor_3_on_detected();

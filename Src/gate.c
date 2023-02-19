@@ -113,12 +113,25 @@ xGate_tt * get_gate(GATE_ENUM id){
 
 uint16_t gate_speed(uint8_t id){
 	uint16_t deg = dome_encoder(id);
-	if(deg > dom_angle_break() && deg < (90 - dom_angle_break())){
-		return dom_pwm_full();
+	uint16_t speed = 0;
+	if(gates[id].state == GATE_STATE_ClOSING){
+		if(deg < (90 - dom_angle_break())){
+			speed = dom_pwm_full();
+		}
+		else{
+			speed = dom_pwm_break();
+		}
 	}
-	else{
-		return dom_pwm_break();
+	if(gates[id].state == GATE_STATE_OPENING){
+		if(deg > dom_angle_break()){
+			speed = dom_pwm_full();
+		}
+		else{
+			speed = dom_pwm_break();
+		}
 	}
+
+	return speed;
 }
 
 uint8_t gate_subscribe(gate_observer_fn observer_fn){
@@ -143,15 +156,18 @@ void gate_close(xGate_tt * g){
 	xMotor_tt * m2 = get_motor(g->mid[1]);
 	uint8_t is_detected_s1 = sensor_is_detected(s1);
 	uint8_t is_detected_s2 = sensor_is_detected(s2);
+	uint16_t speed = gate_speed(g->id);
+	if(!is_detected_s1 || !is_detected_s2){
+		gate_change(g->id, GATE_STATE_ClOSING);
+		g->speed = speed;
+	}
 	if(!is_detected_s1){
 		motor_forward(m1, gate_speed(g->id));
 	}
 	if(!is_detected_s2){
 		motor_forward(m2, gate_speed(g->id));
 	}
-	if(!is_detected_s1 || !is_detected_s2){
-		gate_change(g->id, GATE_STATE_ClOSING);
-	}
+
 }
 
 void gate_open(xGate_tt * g){
@@ -161,13 +177,19 @@ void gate_open(xGate_tt * g){
 	xMotor_tt * m2 = get_motor(g->mid[1]);
 	uint8_t is_detected_s1 = sensor_is_detected(s1);
 	uint8_t is_detected_s2 = sensor_is_detected(s2);
+	uint16_t speed = gate_speed(g->id);
+
+	if(!is_detected_s1 || !is_detected_s2){
+		gate_change(g->id, GATE_STATE_OPENING);
+		g->speed = speed;
+	}
 	if(!is_detected_s1){
 //		// если в середине движения
 //		if(dome_encoder(g->id) > dom_angle_break() && dome_encoder(g->id) < (90 - dom_angle_break()))
 //			motor_back(m1, dom_pwm_full());
 //		else // если подходим к границе
 //			motor_back(m1, dom_pwm_break());
-		motor_back(m1, gate_speed(g->id));
+		motor_back(m1, speed);
 	}
 	if(!is_detected_s2){
 //		// если в середине движения
@@ -175,18 +197,17 @@ void gate_open(xGate_tt * g){
 //			motor_back(m2, dom_pwm_full());
 //		else// если подходим к границе
 //			motor_back(m2, dom_pwm_break());
-		motor_back(m2, gate_speed(g->id));
+		motor_back(m2, speed);
 	}
-	if(!is_detected_s1 || !is_detected_s2){
-		gate_change(g->id, GATE_STATE_OPENING);
-	}
+
 }
 void gate_stop(xGate_tt * g){
 	xMotor_tt * m1 = get_motor(g->mid[0]);
 	xMotor_tt * m2 = get_motor(g->mid[1]);
+	gate_change(g->id, GATE_STATE_STOP);
 	motor_stop(m1);
 	motor_stop(m2);
-	gate_change(g->id, GATE_STATE_STOP);
+	g->speed = 0;
 }
 
 void gate_change(GATE_ENUM id, GATE_STATE_ENUM new_state){
@@ -303,16 +324,26 @@ void gate_poll(uint8_t id){
 			if(deg >= gates[id].angle){
 				gate_stop(&gates[id]);
 			}
+
 		}
 		if(gates[id].state == GATE_STATE_OPENING){
-			if(deg <=  gates[id].angle){
+			if(deg <= gates[id].angle){
 				gate_stop(&gates[id]);
 			}
 		}
 	}
 
-	motor_speed_set(get_motor(gates[id].mid[0]), gate_speed(id));
-	motor_speed_set(get_motor(gates[id].mid[1]), gate_speed(id));
+	uint16_t speed = gate_speed(id);
+
+	if(speed != gates[id].speed){
+		gates[id].speed = speed;
+		if(gates[id].state == GATE_STATE_ClOSING){
+			gate_close(&gates[id]);
+		}
+		if(gates[id].state == GATE_STATE_OPENING){
+			gate_open(&gates[id]);
+		}
+	}
 }
 
 void dome_poll(){
@@ -415,13 +446,6 @@ uint16_t dome_deg_speed(uint8_t id){
 
 uint8_t dome_move_params_set(uint16_t pwm_break, uint16_t pwm_full, uint16_t accel, uint16_t angle_break, float koef1, float koef2, uint8_t rain_inf){
 	uint8_t result = dom_move_params_set(pwm_break, pwm_full, accel, angle_break, koef1, koef2, rain_inf);
-
-	motor_speed_set(get_motor(gates[0].mid[0]), gate_speed(0));
-	motor_speed_set(get_motor(gates[0].mid[1]), gate_speed(0));
-
-	motor_speed_set(get_motor(gates[1].mid[0]), gate_speed(1));
-	motor_speed_set(get_motor(gates[1].mid[1]), gate_speed(1));
-
 	return result;
 }
 
