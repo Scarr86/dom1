@@ -121,11 +121,17 @@ void protocol_parser(uint8_t * buf, uint16_t len){
 }
 
 void handler_cmd_status(uint8_t * params, uint16_t len){
+	uint16_t deg1 = dome_encoder(GATE_1);
+	uint16_t deg2 = dome_encoder(GATE_2);
+	if(~deg1)
+		deg1 = 90 - deg1;
+	if(~deg2)
+		deg2 = 90 - deg2;
 	sprintf(tx_buffer, "STATUS%d,%d,%d,%d,0,0,0,0,0,0,%d,%d,%d,%d,%d\r",
 			dome_status(GATE_1),
 			dome_status(GATE_2),
-			dome_encoder(GATE_1),
-			dome_encoder(GATE_2),
+			deg1,
+			deg2,
 			dom_rele_is_active(RELE_1),
 			dom_rele_is_active(RELE_2),
 			dom_rele_is_active(RELE_3),
@@ -260,15 +266,15 @@ void handler_cmd_gettlm(uint8_t * params, uint16_t len){
 
 	xTlm_tt sensor;
 
-	sensor.c1 = dom_sensor_is_detected(SENSOR_1);
-	sensor.c2 = dom_sensor_is_detected(SENSOR_3);
-	sensor.c3 = dom_sensor_is_detected(SENSOR_5);
-	sensor.c4 = dom_sensor_is_detected(SENSOR_7);
+	sensor.o4 = dom_sensor_is_detected(SENSOR_1);
+	sensor.o3 = dom_sensor_is_detected(SENSOR_3);
+	sensor.o2 = dom_sensor_is_detected(SENSOR_5);
+	sensor.o1 = dom_sensor_is_detected(SENSOR_7);
 
-	sensor.o1 = dom_sensor_is_detected(SENSOR_2);
-	sensor.o1 = dom_sensor_is_detected(SENSOR_4);
-	sensor.o1 = dom_sensor_is_detected(SENSOR_6);
-	sensor.o1 = dom_sensor_is_detected(SENSOR_8);
+	sensor.c4 = dom_sensor_is_detected(SENSOR_2);
+	sensor.c3 = dom_sensor_is_detected(SENSOR_4);
+	sensor.c2 = dom_sensor_is_detected(SENSOR_6);
+	sensor.c1 = dom_sensor_is_detected(SENSOR_8);
 
 	uint8_t s = *((uint8_t*)&sensor);
 

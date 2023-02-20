@@ -414,7 +414,15 @@ uint8_t dome_status(uint8_t id){
 }
 //возращает угол закрытия верхней створки
 int8_t dome_encoder(uint8_t id){
-	return (dom_motor_deg(gates[id].mid[0]) + dom_motor_deg(gates[id].mid[1])) / 2;
+
+	int32_t p1 = dom_motor_pos(gates[id].mid[0]);
+	int32_t p2 = dom_motor_pos(gates[id].mid[1]);
+	int32_t s1 = dom_motor_dist(gates[id].mid[0]);
+	int32_t s2 = dom_motor_dist(gates[id].mid[1]);
+
+	if(~p1 && ~p2)
+		return ((p1 + p2) * 90) / (s1 + s2);
+	return -1;
 }
 float dome_koef(uint8_t id){
 	//TODO

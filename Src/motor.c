@@ -117,11 +117,7 @@ uint16_t motor_speed(xMotor_tt *m){
 	return m->speed;
 }
 uint16_t motor_deg_speed(xMotor_tt * m){
-	int32_t dist = motor_dist(m);
-	if(~dist){ // if has dist
-		return (dist / 90) / (1000 / DIST_TIMER_GAP);
-	}
-	return m->deg_speed;
+	return ( motor_dist(m) / 90) / (1000 / DIST_TIMER_GAP);
 }
 int8_t motor_dir(xMotor_tt *m){
 	if(m->GPIOx && m->pin)
@@ -133,21 +129,32 @@ uint8_t motor_state(xMotor_tt * m){
 }
 int16_t motor_deg(xMotor_tt * m){
 
-	if(m->is_pos_0 && m->is_pos_90){
-		return ((m->pos - m->pos_0) * 90) / motor_dist(m);
-	}
-	else if(m->is_pos_0){
-		return ((m->pos - m->pos_0) / m->deg_speed) / (1000 / DIST_TIMER_GAP);
-	}
-	else if( m->is_pos_90){
-		return 90 - (((m->pos_90 - m->pos) / m->deg_speed) / (1000 / DIST_TIMER_GAP));
-	}
-	else{
-		return -1;
-	}
+	if(m->is_pos_0 || m->is_pos_90)
+		return (motor_pos(m) / (1000 / DIST_TIMER_GAP)) / motor_deg_speed(m);
+	return -1;
+
+//	if(m->is_pos_0 && m->is_pos_90){
+//		return ((m->pos - m->pos_0) * 90) / motor_dist(m);
+//	}
+//	else if(m->is_pos_0){
+//		return ((m->pos - m->pos_0) / m->deg_speed) / (1000 / DIST_TIMER_GAP);
+//	}
+//	else if( m->is_pos_90){
+//		return 90 - (((m->pos_90 - m->pos) / m->deg_speed) / (1000 / DIST_TIMER_GAP));
+//	}
+//	else{
+//		return -1;
+//	}
 }
 int32_t motor_pos(xMotor_tt * m){
-	return m->pos;
+
+	if(m->is_pos_0)
+		return m->pos - m->pos_0;
+	if(m->is_pos_90)
+		// pos90 - pos0 - pos90 + pos
+		return motor_dist(m) - (m->pos_90 - m->pos);
+
+	return -1;
 }
 void motor_pos_clear(xMotor_tt * m){
 	m->pos = 0;
@@ -209,9 +216,11 @@ int32_t motor_pos_90(xMotor_tt * m){
 	return -1;
 }
 int32_t motor_dist(xMotor_tt * m){
+
 	if(m->is_pos_0 && m->is_pos_90 && (m->pos_90 > m->pos_0))
 		return m->pos_90 - m->pos_0;
-	return -1;
+
+	return 90 * m->deg_speed * (1000/DIST_TIMER_GAP);
 }
 
 
