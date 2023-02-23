@@ -6,6 +6,7 @@
  */
 
 #include "settings.h"
+extern IWDG_HandleTypeDef hiwdg;
 
 static uint32_t flash_address=0x08040000;
 static uint16_t flash_write_byte(uint8_t byte, uint32_t address);
@@ -23,10 +24,12 @@ uint16_t flash_write(void * data, uint32_t len){
 
 	HAL_FLASH_Unlock();
 	for(uint32_t i = 0; i < len; ++i){
+		HAL_IWDG_Refresh(&hiwdg);
 		result = flash_write_byte(d[i], flash_address + i);
 		if(result != HAL_OK){
 			break;
 		}
+
 	}
 	HAL_FLASH_Lock();
 	return result;
