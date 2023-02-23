@@ -61,26 +61,24 @@ void dome_poll();
 //void dome_close();
 
 // указать номер ворот и нужный угол (считается от вертикали)
-void dome_open(uint8_t id, uint16_t angle);
+void cupol_open(uint8_t id, uint16_t angle);
 
-void dome_stop();
+void cupol_stop();
 
-uint8_t dome_state(uint8_t id);
+uint8_t cupol_state(uint8_t id);
 
 uint8_t dome_status(uint8_t id);
 
 //возращает угол закрытия верхней створки
-int8_t dome_encoder(uint8_t id);
+int8_t cupol_encoder(uint8_t id);
 
-float dome_koef(uint8_t id);
+float cupol_koef(uint8_t id);
 
-int32_t dome_dist(uint8_t id);
+int32_t cupol_dist(uint8_t id);
 
-int32_t dome_pos(uint8_t id);
+int32_t cupol_pos(uint8_t id);
 
-// возращает измереное значение
-uint16_t dome_deg_speed(uint8_t id);
 
-uint8_t dome_move_params_set(uint16_t pwm_break, uint16_t pwm_full, uint16_t accel, uint16_t angle_break, float koef1, float koef2, uint8_t rain_inf);
+uint8_t cupol_move_params_set(uint16_t pwm_break, uint16_t pwm_full, uint16_t accel, uint16_t angle_break, float koef1, float koef2, uint8_t rain_inf);
 
 #endif /* GATE_H_ */

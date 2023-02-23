@@ -222,6 +222,7 @@ void dom_init(){
 		motor_init(&motor[i], i);
 		if(!settings_is_valid){
 			dom_settings.motor_settings[i].deg_speed = MOTOR_DEG_SPEED_DEF;
+			dom_settings.motor_settings[i].dir = MOTOR_DIR_DEF;
 		}
 		motor_set(&motor[i], dom_settings.pwm_break, dom_settings.motor_settings[i].deg_speed, dom_settings.pwm_accel);
 	}
@@ -557,9 +558,6 @@ void dom_motor_stop(uint8_t id){
 }
 int32_t dom_motor_pos(uint8_t id){
 	return motor_pos(&motor[id]);
-}
-int16_t dom_motor_deg(uint8_t id){
-	return motor_deg(&motor[id]);
 }
 //void dom_motor_dist_clear(uint8_t id){
 //	motor_dist_clear(&motor[id]);

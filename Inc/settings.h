@@ -42,6 +42,7 @@ typedef struct{
 
 typedef struct{
 	uint16_t deg_speed;
+	uint8_t dir;
 }xMotor_settings_tt;
 
 

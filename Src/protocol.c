@@ -121,8 +121,8 @@ void protocol_parser(uint8_t * buf, uint16_t len){
 }
 
 void handler_cmd_status(uint8_t * params, uint16_t len){
-	uint16_t deg1 = dome_encoder(GATE_1);
-	uint16_t deg2 = dome_encoder(GATE_2);
+	uint16_t deg1 = cupol_encoder(GATE_1);
+	uint16_t deg2 = cupol_encoder(GATE_2);
 	if(~deg1)
 		deg1 = 90 - deg1;
 	if(~deg2)
@@ -142,17 +142,17 @@ void handler_cmd_status(uint8_t * params, uint16_t len){
 }
 
 void handler_cmd_stop_dome(uint8_t * params, uint16_t len){
-	dome_stop();
+	cupol_stop();
 	sender("OK\r", 4);
 }
 void handler_cmd_open_dome(uint8_t * params, uint16_t len){
-	dome_open(GATE_1, 90);
-	dome_open(GATE_2, 90);
+	cupol_open(GATE_1, 90);
+	cupol_open(GATE_2, 90);
 	sender("OK\r", 4);
 }
 void handler_cmd_close_dome(uint8_t * params, uint16_t len){
-	dome_open(GATE_1, 0);
-	dome_open(GATE_2, 0);
+	cupol_open(GATE_1, 0);
+	cupol_open(GATE_2, 0);
 	sender("OK\r", 4);
 }
 
@@ -175,7 +175,7 @@ void handler_cmd_shutter_move_deg(uint8_t * params, uint16_t len){
 		sender(error_str, strlen(error_str));
 		return;
 	}
-	dome_open(n, angle);
+	cupol_open(n, angle);
 
 	sender("OK\r", 4);
 }
@@ -227,8 +227,8 @@ void handler_cmd_get_move_params(uint8_t * params, uint16_t len){
 			dom_pwm_full(),
 			dom_pwm_accel(),
 			dom_angle_break(),
-			dome_koef(0),
-			dome_koef(1),
+			cupol_koef(0),
+			cupol_koef(1),
 			dom_sensor_rain_cmpval(0));
 	sender(tx_buffer, strlen(tx_buffer));
 }
@@ -250,7 +250,7 @@ void handler_cmd_set_move_params(uint8_t * params, uint16_t len){
 		i += 1;
 	}
 	if(i == sizeof val / 2){
-		if(dome_move_params_set(val[0], val[1], val[2], val[3], val[4], val[5], val[6])){
+		if(cupol_move_params_set(val[0], val[1], val[2], val[3], val[4], val[5], val[6])){
 			sender("OK\r", 4);
 		}
 		else{

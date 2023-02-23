@@ -188,7 +188,6 @@ void cli_cmd_parser(uint8_t * cmd){
 							"state: %d\r\n"
 							"dir: %d\r\n"
 							"speed: %d\r\n"
-							"deg: %d\r\n"
 							"deg_speed_set / deg_speed: %lu / %lu\r\n"
 							"dist / pos: %ld / %ld\r\n"
 							"pos_0 / pos_90: %ld / %ld\r\n",
@@ -196,7 +195,6 @@ void cli_cmd_parser(uint8_t * cmd){
 							dom_motor_state(id),
 							dom_motor_dir(id),
 							dom_motor_speed(id),
-							dom_motor_deg(id),
 							dom_motor_deg_speed(id), motor_deg_speed(get_motor(id)),
 							dom_motor_dist(id), dom_motor_pos(id),
 							dom_motor_pos_0(id), dom_motor_pos_90(id)
@@ -222,16 +220,12 @@ void cli_cmd_parser(uint8_t * cmd){
 					slen = sprintf(cbuf, "\r\n-GATE [%d]-\r\n"
 							"state: %s\r\n"
 							"dist / pos: %ld / %ld\r\n"
-							"deg_speed_set / deg_speed: %lu / %lu\r\n"
 							"deg: %d\r\n",
 							id + 1,
-							dome_state(id) == GATE_STATE_STOP ? "STOP":
-									dome_state(id) == GATE_STATE_ClOSING ? "ClOSING" : "OPENING",
-							dome_dist(id),
-							dome_pos(id),
-							(dom_motor_deg_speed(get_gate(id)->mid[0]) + dom_motor_deg_speed(get_gate(id)->mid[1])) / 2,
-							dome_deg_speed(id),
-							dome_encoder(id)
+							cupol_state(id) == GATE_STATE_STOP ? "STOP":
+									cupol_state(id) == GATE_STATE_ClOSING ? "ClOSING" : "OPENING",
+							cupol_dist(id), cupol_pos(id),
+							cupol_encoder(id)
 							);
 					sender(cbuf, slen);
 

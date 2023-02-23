@@ -25,6 +25,7 @@
 #define SENSOR_CMP_VAL_DEF (1)
 //#define SENSOR_CMP_VAL_DEF (0) // todo debug
 #define MOTOR_DEG_SPEED_DEF (115)
+#define MOTOR_DIR_DEF (0)
 #define SENSOR_RAIN_ENABLE_DEF (1)
 #define SENSOR_RAIN_CMP_VAL_DEF (1)
 
@@ -191,7 +192,6 @@ void dom_motor_forward(uint8_t id, uint16_t speed);
 void dom_motor_back(uint8_t id, uint16_t speed);
 void dom_motor_stop(uint8_t id);
 int32_t dom_motor_pos(uint8_t id);
-int16_t dom_motor_deg(uint8_t id);
 
 void dom_motor_save_pos_0(uint8_t id);
 void dom_motor_save_pos_90(uint8_t id);

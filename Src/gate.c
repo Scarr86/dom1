@@ -112,7 +112,7 @@ xGate_tt * get_gate(GATE_ENUM id){
 
 
 uint16_t gate_speed(uint8_t id){
-	int16_t deg = dome_encoder(id);
+	int16_t deg = cupol_encoder(id);
 	uint16_t speed = 0;
 
 	if(deg == -1)
@@ -189,7 +189,7 @@ void gate_open(xGate_tt * g){
 	}
 	if(!is_detected_s1){
 //		// если в середине движения
-//		if(dome_encoder(g->id) > dom_angle_break() && dome_encoder(g->id) < (90 - dom_angle_break()))
+//		if(cupol_encoder(g->id) > dom_angle_break() && cupol_encoder(g->id) < (90 - dom_angle_break()))
 //			motor_back(m1, dom_pwm_full());
 //		else // если подходим к границе
 //			motor_back(m1, dom_pwm_break());
@@ -197,7 +197,7 @@ void gate_open(xGate_tt * g){
 	}
 	if(!is_detected_s2){
 //		// если в середине движения
-//		if(dome_encoder(g->id) > dom_angle_break() && dome_encoder(g->id) < (90 - dom_angle_break()))
+//		if(cupol_encoder(g->id) > dom_angle_break() && cupol_encoder(g->id) < (90 - dom_angle_break()))
 //			motor_back(m2, dom_pwm_full());
 //		else// если подходим к границе
 //			motor_back(m2, dom_pwm_break());
@@ -311,8 +311,8 @@ void on_sensor_rain_detected(uint8_t id){
 	if(id == SENSOR_RAIN_1){
 		if(dom_sensor_rain_is_detected(SENSOR_RAIN_1)){
 			dom_led_on(LED_RAIN);
-			dome_open(GATE_1, 0);
-			dome_open(GATE_2, 0);
+			cupol_open(GATE_1, 0);
+			cupol_open(GATE_2, 0);
 		}
 		else{
 			dom_led_off(LED_RAIN);
@@ -322,7 +322,7 @@ void on_sensor_rain_detected(uint8_t id){
 
 
 void gate_poll(uint8_t id){
-	uint16_t deg = dome_encoder(id);
+	uint16_t deg = cupol_encoder(id);
 	if(~gates[id].angle){
 		if(gates[id].state == GATE_STATE_ClOSING){
 			if(deg >= gates[id].angle){
@@ -363,9 +363,9 @@ void dome_poll(){
 //}
 
 
-void dome_open(uint8_t id, uint16_t angle){
+void cupol_open(uint8_t id, uint16_t angle){
 
-	uint16_t deg = dome_encoder(id);
+	uint16_t deg = cupol_encoder(id);
 	uint16_t need_deg = 90 - angle;
 
 	gates[id].angle = -1;
@@ -389,11 +389,11 @@ void dome_open(uint8_t id, uint16_t angle){
 		}
 	}
 }
-void dome_stop(){
+void cupol_stop(){
 	gate_stop(&gates[GATE_1]);
 	gate_stop(&gates[GATE_2]);
 }
-uint8_t dome_state(uint8_t id){
+uint8_t cupol_state(uint8_t id){
 	return gates[id].state;
 }
 
@@ -413,7 +413,7 @@ uint8_t dome_status(uint8_t id){
 	return 3;
 }
 //возращает угол закрытия верхней створки
-int8_t dome_encoder(uint8_t id){
+int8_t cupol_encoder(uint8_t id){
 
 	int32_t p1 = dom_motor_pos(gates[id].mid[0]);
 	int32_t p2 = dom_motor_pos(gates[id].mid[1]);
@@ -424,12 +424,12 @@ int8_t dome_encoder(uint8_t id){
 		return ((p1 + p2) * 90) / (s1 + s2);
 	return -1;
 }
-float dome_koef(uint8_t id){
+float cupol_koef(uint8_t id){
 	//TODO
 	return gates[id].koef;
 }
 
-int32_t dome_dist(uint8_t id){
+int32_t cupol_dist(uint8_t id){
 	int32_t dist_1 = dom_motor_dist(gates[id].mid[0]);
 	int32_t dist_2 = dom_motor_dist(gates[id].mid[1]);
 	if(~dist_1 && ~dist_2){
@@ -437,26 +437,17 @@ int32_t dome_dist(uint8_t id){
 	}
 	return -1;
 }
-int32_t dome_pos(uint8_t id){
-	xMotor_tt * m1 = get_motor(gates[id].mid[0]);
-	xMotor_tt * m2 = get_motor(gates[id].mid[1]);
+int32_t cupol_pos(uint8_t id){
+	int32_t pos1 = dom_motor_pos(gates[id].mid[0]);
+	int32_t pos2 = dom_motor_pos(gates[id].mid[1]);
 
-	if(m1->is_pos_0 && m2->is_pos_0){
-		return (motor_pos(m1) -  m1->pos_0) + (motor_pos(m2) -  m2->pos_0);
-	}
-	if(m1->is_pos_90 && m2->is_pos_90){
-		return ((m1->pos_90 - motor_pos(m1)) + (m2->pos_90 - motor_pos(m2))) * -1;
+	if(~pos1 && ~pos2){
+		return pos1 + pos2;
 	}
 	return -1;
 }
 
-uint16_t dome_deg_speed(uint8_t id){
-	xMotor_tt * m1 = get_motor(gates[id].mid[0]);
-	xMotor_tt * m2 = get_motor(gates[id].mid[1]);
-	return (motor_deg_speed(m1) + motor_deg_speed(m2))  / 2 ;
-}
-
-uint8_t dome_move_params_set(uint16_t pwm_break, uint16_t pwm_full, uint16_t accel, uint16_t angle_break, float koef1, float koef2, uint8_t rain_inf){
+uint8_t cupol_move_params_set(uint16_t pwm_break, uint16_t pwm_full, uint16_t accel, uint16_t angle_break, float koef1, float koef2, uint8_t rain_inf){
 	uint8_t result = dom_move_params_set(pwm_break, pwm_full, accel, angle_break, koef1, koef2, rain_inf);
 	return result;
 }

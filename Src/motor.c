@@ -75,10 +75,11 @@ void motor_speed_set(xMotor_tt * m, uint16_t speed){
 
 	*((uint32_t *)m->ccr) = m->cur_speed;
 }
+
 void motor_forward(xMotor_tt * m, uint16_t speed){
 	m->state = MOTOR_STATE_FORWARD;
 	if(m->GPIOx && m->pin)
-		HAL_GPIO_WritePin(m->GPIOx, m->pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(m->GPIOx, m->pin, m->dir);
 	motor_speed_set(m, speed);
 	motor_pos_start(m, calc_pos_inc);
 	//*((uint32_t *)m->ccr) = m->cur_speed;
@@ -89,7 +90,7 @@ void motor_forward(xMotor_tt * m, uint16_t speed){
 void motor_back(xMotor_tt * m, uint16_t speed){
 	m->state = MOTOR_STATE_BACK;
 	if(m->GPIOx && m->pin)
-		HAL_GPIO_WritePin(m->GPIOx, m->pin, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(m->GPIOx, m->pin, !m->dir);
 	motor_speed_set(m, speed);
 	motor_pos_start(m, calc_pos_dec);
 }
@@ -99,15 +100,8 @@ void motor_set(xMotor_tt * m, int16_t speed, int16_t deg_speed, int16_t accel){
 	if(~accel){
 		m->accel = accel;
 	}
-
 	if(speed != -1){
 		m->speed = speed;
-//		if(m->state == MOTOR_STATE_BACK){
-//			motor_back(m);
-//		}
-//		if(m->state == MOTOR_STATE_FORWARD){
-//			motor_forward(m);
-//		}
 	}
 	if(deg_speed != -1){
 		m->deg_speed = deg_speed;
@@ -127,25 +121,7 @@ int8_t motor_dir(xMotor_tt *m){
 uint8_t motor_state(xMotor_tt * m){
 	return m->state;
 }
-int16_t motor_deg(xMotor_tt * m){
 
-	if(m->is_pos_0 || m->is_pos_90)
-		return (motor_pos(m) / (1000 / DIST_TIMER_GAP)) / motor_deg_speed(m);
-	return -1;
-
-//	if(m->is_pos_0 && m->is_pos_90){
-//		return ((m->pos - m->pos_0) * 90) / motor_dist(m);
-//	}
-//	else if(m->is_pos_0){
-//		return ((m->pos - m->pos_0) / m->deg_speed) / (1000 / DIST_TIMER_GAP);
-//	}
-//	else if( m->is_pos_90){
-//		return 90 - (((m->pos_90 - m->pos) / m->deg_speed) / (1000 / DIST_TIMER_GAP));
-//	}
-//	else{
-//		return -1;
-//	}
-}
 int32_t motor_pos(xMotor_tt * m){
 
 	if(m->is_pos_0)
@@ -156,9 +132,7 @@ int32_t motor_pos(xMotor_tt * m){
 
 	return -1;
 }
-void motor_pos_clear(xMotor_tt * m){
-	m->pos = 0;
-}
+
 void motor_pos_start(xMotor_tt * m, void(*calc_pos)(xTimer_tt * t, void * thisArg)){
 	timer_set(&m->pos_timer, DIST_TIMER_GAP, calc_pos, m);
 }
@@ -173,7 +147,6 @@ void motor_pos_stop(xMotor_tt * m){
 		m->pos -=  dist;
 	}
 	motor_pos_adjust(m);
-
 }
 
 void motor_pos_adjust(xMotor_tt * m){
