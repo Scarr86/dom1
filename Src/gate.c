@@ -308,7 +308,7 @@ void gate_poll(uint8_t id){
 	uint8_t sensor_st = 0;
 
 	sensor_st = (dom_sensor_is_detected(id_close_1) << 0) | (dom_sensor_is_detected(id_close_2) << 2)
-			| (dom_sensor_is_detected(id_open_1) << 1) | (dom_sensor_is_detected(id_open_1) << 3);
+			| (dom_sensor_is_detected(id_open_1) << 1) | (dom_sensor_is_detected(id_open_2) << 3);
 
 	if(sensor_st == 0x05 || sensor_st == 0xA ){
 		if(id == GATE_1){
