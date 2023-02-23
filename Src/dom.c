@@ -570,7 +570,7 @@ uint8_t dom_motor_set(uint8_t id, int8_t dir, int16_t speed, int16_t min_speed, 
 
 	motor_set(&motor[id], dir, speed, deg_speed, accel);
 
-	if(~dir || speed != -1 || deg_speed != -1 || min_speed != -1){
+	if(~dir || speed != -1 || deg_speed != -1 || min_speed != -1 || ~accel){
 		return settings_write(&dom_settings);
 	}
 

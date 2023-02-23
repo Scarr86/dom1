@@ -113,6 +113,10 @@ void motor_set(xMotor_tt * m, int8_t dir, int16_t speed, int16_t deg_speed, int1
 uint16_t motor_speed(xMotor_tt *m){
 	return m->speed;
 }
+
+uint16_t motor_accel(xMotor_tt *m){
+	return m->accel;
+}
 uint16_t motor_deg_speed(xMotor_tt * m){
 	return ( motor_dist(m) / 90) / (1000 / DIST_TIMER_GAP);
 }

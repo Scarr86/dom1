@@ -202,7 +202,7 @@ void cli_cmd_parser(uint8_t * cmd){
 							dom_motor_state(id),
 							dom_motor_dir(id),
 							dom_motor_speed(id),
-							dom_pwm_accel(),
+							motor_accel(get_motor(id)),
 							dom_motor_deg_speed(id), motor_deg_speed(get_motor(id)),
 							dom_motor_dist(id), dom_motor_pos(id),
 							dom_motor_pos_0(id), dom_motor_pos_90(id)

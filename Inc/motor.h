@@ -50,6 +50,7 @@ void motor_back(xMotor_tt * m, uint16_t speed);
 void motor_speed_set(xMotor_tt * m, uint16_t speed);
 void motor_set(xMotor_tt * m, int8_t dir, int16_t speed, int16_t deg_speed, int16_t accel);
 uint16_t motor_speed(xMotor_tt *m);
+uint16_t motor_accel(xMotor_tt *m);
 uint16_t motor_deg_speed(xMotor_tt * m);
 int8_t motor_dir(xMotor_tt *m);
 uint8_t motor_state(xMotor_tt * m);

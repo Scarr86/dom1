@@ -31,7 +31,7 @@
 
 #define PWM_BREAK_DEF (100)
 #define PWM_FULL_DEF (400)
-#define PWM_ACCEL_DEF (150)
+#define PWM_ACCEL_DEF (10)
 #define ANGLE_BREAK_DEF (30)
 
 #define PWDG_TIMEOUT_DEF (10000)
