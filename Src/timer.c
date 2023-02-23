@@ -96,7 +96,10 @@ uint8_t timer_expired(xTimer_tt * t){
 }
 
 uint32_t timer_remaining(xTimer_tt * t){
-	return t->start + t->interval - HAL_GetTick();
+	if(timer_expired(t))
+		return 0;
+	else
+		return t->start + t->interval - HAL_GetTick();
 }
 
 uint8_t timer_is_running(xTimer_tt * t){

@@ -34,6 +34,8 @@
 #define PWM_ACCEL_DEF (150)
 #define ANGLE_BREAK_DEF (30)
 
+#define PWDG_TIMEOUT_DEF (10000)
+
 
 typedef enum{
 	BUTTON_1,
@@ -104,6 +106,7 @@ typedef struct{
 	uint16_t pwm_full;
 	uint16_t pwm_accel;
 	uint16_t angle_break;
+	uint16_t pwdg_timeout;
 }xDom_settings_tt;
 
 typedef void (* btn_observers_fn)(uint8_t id);
@@ -228,6 +231,14 @@ uint16_t dom_pwm_accel();
 uint16_t dom_angle_break();
 uint8_t dom_move_params_set(uint16_t pwm_break, uint16_t pwm_full, uint16_t accel, uint16_t angle_break, float koef1, float koef2, uint8_t rain_inf);
 // MOVE PARAMS END
+
+// Protocol watchdog start
+void pwdg_init(on_timeout_fn cb);
+uint8_t pwdg_set_timeout(uint16_t timeout);
+void pwdg_refresh();
+uint16_t pwdg_timeout();
+uint16_t pwdg_remaining();
+// Protocol watchdog end
 
 
 

@@ -124,14 +124,16 @@ int main(void)
 
   HAL_TIM_PWM_Start(&htim12, TIM_CHANNEL_2);
 
+
+
+  dom_init();
+  gate_init();
+
   usb_subscribe(cli_parser);
   cli_init(usb_send);
 
   usb_subscribe(protocol_parser);
   protocol_init(usb_send);
-
-  dom_init();
-  gate_init();
 
   //HAL_UART_Receive_IT(huart, pData, Size)
 
@@ -461,8 +463,8 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOE, LED_MOTOR_MOVE_Pin|LED_OPEN_CLOSE_GATE_1_Pin|LED_OPEN_CLOSE_GATE_2_Pin|LED_RAIN_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : SENSOR_RAIN_Pin SW_LED_OFF_Pin */
-  GPIO_InitStruct.Pin = SENSOR_RAIN_Pin|SW_LED_OFF_Pin;
+  /*Configure GPIO pins : SENSOR_RAIN_Pin SW_PWDG_OFF_Pin SW_LED_OFF_Pin */
+  GPIO_InitStruct.Pin = SENSOR_RAIN_Pin|SW_PWDG_OFF_Pin|SW_LED_OFF_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);

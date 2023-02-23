@@ -28,6 +28,10 @@ const char * help = "\r\n/h - help\r\n"
 		"\t 'o' - state all or [id] odometer\r\n"
 		"\t 'l' - state led\r\n"
 		"\t 'g' - state gate all or [id]\r\n"
+		"\t 'p' - state and settinds protocol watchdog\r\n"
+		"/p option [params] - settings protocol watchdog\r\n"
+		"option:\r\n"
+		"\t '=' - set [timeout, ...]\r\n"
 		"/m id option [params] - settings and control motor\r\n"
 		"option:\r\n"
 		"\t '=' - set [dir, speed, min_speed, deg_speed, accel ...] set -1 - skip param;  warning: speed, min_speed, accel - common params!\r\n"
@@ -131,6 +135,8 @@ void cli_cmd_parser(uint8_t * cmd){
 				sprintf(tbuf, "? g");
 				cli_cmd_parser(tbuf);
 				sprintf(tbuf, "? l");
+				cli_cmd_parser(tbuf);
+				sprintf(tbuf, "? p");
 				cli_cmd_parser(tbuf);
 				return;
 			}
@@ -252,6 +258,14 @@ void cli_cmd_parser(uint8_t * cmd){
 						sender(cbuf, slen);
 					}
 				break;
+				case 'p':
+						slen = sprintf(cbuf, "\r\n-PWDG-\r\n"
+								"state: %ld\r\n"
+								"timeout: %ld\r\n",
+								pwdg_remaining(),
+								pwdg_timeout());
+						sender(cbuf, slen);
+				break;
 				default:
 					slen = sprintf(cbuf, "\r\nincorrect command");
 					sender(cbuf, slen);
@@ -369,6 +383,29 @@ void cli_cmd_parser(uint8_t * cmd){
 				break;
 			}
 
+		break;
+		case 'p':
+			p = strtok(NULL, sep);// read option
+			if(p == NULL){
+				slen = sprintf(cbuf, "\r\nincorrect command");
+				sender(cbuf, slen);
+				return;
+			}
+			switch(*p){
+				case '=':
+					p = strtok(NULL, sep);
+					if(p == NULL){
+						slen = sprintf(cbuf, "\r\nincorrect command");
+						sender(cbuf, slen);
+						return;
+					}
+					else{
+						result = pwdg_set_timeout(atoi(p));
+					}
+					slen = sprintf(cbuf, "\n%s", result > 0 ? "fail" : "done");
+					sender(cbuf, slen);
+				break;
+			}
 		break;
 
 		default:

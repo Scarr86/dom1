@@ -28,6 +28,8 @@ void handler_cmd_get_move_params(uint8_t * params, uint16_t len);
 void handler_cmd_set_move_params(uint8_t * params, uint16_t len);
 void handler_cmd_gettlm(uint8_t * params, uint16_t len);
 
+void on_pwdg_timeout(xTimer_tt * t , void * thisArg);
+
 typedef struct sTlm{
 	uint8_t c1:1;
 	uint8_t c2:1;
@@ -93,6 +95,8 @@ uint8_t def_sender(char * buf, uint16_t len){
 
 void protocol_init(protocol_sender_tt protocol_sender){
 	sender = protocol_sender ? protocol_sender: def_sender;
+
+	pwdg_init(on_pwdg_timeout);
 }
 void protocol_parser(uint8_t * buf, uint16_t len){
 
@@ -109,6 +113,7 @@ void protocol_parser(uint8_t * buf, uint16_t len){
 			uint16_t cmd_cnt = sizeof cmds / sizeof cmds[0];
 			for(uint16_t i = 0; i < cmd_cnt; ++i){
 				if(strstr(buffer, cmds[i].cmd)){
+					pwdg_refresh();
 					cmds[i].handler(buffer + strlen(cmds[i].cmd), strlen(buffer) - strlen(cmds[i].cmd));
 				}
 			}
@@ -121,8 +126,8 @@ void protocol_parser(uint8_t * buf, uint16_t len){
 }
 
 void handler_cmd_status(uint8_t * params, uint16_t len){
-	uint16_t deg1 = cupol_encoder(GATE_1);
-	uint16_t deg2 = cupol_encoder(GATE_2);
+	int16_t deg1 = cupol_encoder(GATE_1);
+	int16_t deg2 = cupol_encoder(GATE_2);
 	if(~deg1)
 		deg1 = 90 - deg1;
 	if(~deg2)
@@ -285,4 +290,9 @@ void handler_cmd_gettlm(uint8_t * params, uint16_t len){
 			dom_odometer_value(2),
 			dom_odometer_value(3));
 	sender(tx_buffer, strlen(tx_buffer));
+}
+
+void on_pwdg_timeout(xTimer_tt * t , void * thisArg){
+	cupol_open(GATE_1, 0);
+	cupol_open(GATE_2, 0);
 }

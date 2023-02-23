@@ -390,6 +390,9 @@ void cupol_open(uint8_t id, uint16_t angle){
 		gate_close(&gates[id]);
 	}
 	else{
+		if(deg == -1){
+			return;
+		}
 		if(deg == need_deg){
 			return;
 		}
