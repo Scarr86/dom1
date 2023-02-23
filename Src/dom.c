@@ -517,9 +517,7 @@ void dom_sensor_rain_1_on_change(){
 
 // MOTOR FUNCTION START
 int8_t dom_motor_state(uint8_t id){
-	if(id == 0 || id > MOTOR_COUNT)
-		return -1;
-	return motor_state(&motor[id-1]);
+	return motor_state(&motor[id]);
 }
 int16_t dom_motor_speed(uint8_t id){
 	return motor_speed(&motor[id]);
