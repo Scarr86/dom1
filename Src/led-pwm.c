@@ -33,6 +33,10 @@ void led_pwm_off(xLed_pwm_tt * led){
 	led->pwm_value = LED_MAX;
 	*((uint32_t *)led->ccr) = led->pwm_value;
 }
+void led_pwm_hard_off(xLed_pwm_tt * led){
+	timer_stop(&led->timer);
+	*((uint32_t *)led->ccr) = LED_MAX;
+}
 void led_pwm_blink(xLed_pwm_tt * led , uint32_t frq){
 	if(frq == 0){
 		frq = led->frq == 0 ? 1: led->frq;

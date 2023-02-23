@@ -274,14 +274,21 @@ void dom_poll(){
 	
 	if(sw_led_off != HAL_GPIO_ReadPin(SW_LED_OFF_GPIO_Port, SW_LED_OFF_Pin)){
 		sw_led_off = !sw_led_off;
+
 		if(sw_led_off == 0){
 			for(uint16_t i = 0; i < LED_COUNT; ++i){
 				led_update(&led[i]);
 			}
 			led_pwm_update(&led_pwm);
 		}
-	}
 
+		if(sw_led_off == 1){
+			for(uint16_t i = 0; i < LED_COUNT; ++i){
+				led_hard_off(&led[i]);
+			}
+			led_pwm_hard_off(&led_pwm);
+		}
+	}
 }
 
 uint16_t settings_write(xDom_settings_tt * ds){

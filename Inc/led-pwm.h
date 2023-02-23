@@ -39,7 +39,9 @@ typedef struct{
 void led_pwm_update(xLed_pwm_tt * led);
 void led_pwm_on(xLed_pwm_tt * led);
 void led_pwm_off(xLed_pwm_tt * led);
+void led_pwm_hard_off(xLed_pwm_tt * led);
 void led_pwm_blink(xLed_pwm_tt * led , uint32_t frq);
+
 
 void led_pwm_on_timeout(xTimer_tt * t, void * thisArg);
 uint8_t led_pwm_state(xLed_pwm_tt * led);

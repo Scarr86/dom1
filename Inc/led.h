@@ -18,6 +18,7 @@ typedef struct{
 
 void led_on(xLed_tt * led);
 void led_off(xLed_tt * led);
+void led_hard_off(xLed_tt * led);
 void led_update(xLed_tt * led);
 
 
