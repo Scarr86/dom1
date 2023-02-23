@@ -311,16 +311,23 @@ void gate_poll(uint8_t id){
 			| (dom_sensor_is_detected(id_open_1) << 1) | (dom_sensor_is_detected(id_open_2) << 3);
 
 	if(sensor_st == 0x05 || sensor_st == 0xA ){
-		timer_stop(&timer_sensor_led_1_error);
+
 		if(id == GATE_1){
+			timer_stop(&timer_sensor_led_1_error);
 			dom_led_on(LED_OPEN_CLOSE_GATE_1);
 		}
 		if(id == GATE_2){
+			timer_stop(&timer_sensor_led_2_error);
 			dom_led_on(LED_OPEN_CLOSE_GATE_2);
 		}
 	}
 	else{
-		timer_set(&timer_sensor_led_1_error, 300, on_timer_sensor_led_error, &gates[id]);
+		if(id == GATE_1){
+			timer_set(&timer_sensor_led_1_error, 300, on_timer_sensor_led_error, &gates[id]);
+		}
+		if(id == GATE_2){
+			timer_set(&timer_sensor_led_2_error, 300, on_timer_sensor_led_error, &gates[id]);
+		}
 	}
 
 
