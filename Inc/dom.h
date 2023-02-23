@@ -187,7 +187,7 @@ int16_t dom_motor_speed(uint8_t id);
 // возращает установленное значение
 int16_t dom_motor_deg_speed(uint8_t id);
 int8_t dom_motor_dir(uint8_t id);
-uint8_t dom_motor_set(uint8_t id, int16_t speed, int16_t min_speed, int16_t deg_speed);
+uint8_t dom_motor_set(uint8_t id, int8_t dir, int16_t speed, int16_t min_speed, int16_t deg_speed, int16_t accel);
 void dom_motor_forward(uint8_t id, uint16_t speed);
 void dom_motor_back(uint8_t id, uint16_t speed);
 void dom_motor_stop(uint8_t id);

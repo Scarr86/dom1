@@ -28,19 +28,19 @@ const char * help = "\r\n/h - help\r\n"
 		"\t 'o' - state all or [id] odometer\r\n"
 		"\t 'l' - state led\r\n"
 		"\t 'g' - state gate all or [id]\r\n"
-		"/m id option [speed, min_speed, deg_speed, ...] - settings and control motor\r\n"
+		"/m id option [params] - settings and control motor\r\n"
 		"option:\r\n"
-		"\t '=' - set [speed, ...]\r\n"
+		"\t '=' - set [dir, speed, min_speed, deg_speed, accel ...] set -1 - skip param;  warning: speed, min_speed, accel - common params!\r\n"
 		"\t '>' - turn forward\r\n"
 		"\t '<' - turn back\r\n"
 		"\t '*' - stop\r\n"
-		"/b id option [debounceTime, ...] - settings button\r\n"
+		"/b id option [params] - settings button\r\n"
 		"option:\r\n"
 		"\t '=' - set [debounceTime, ...]\r\n"
-		"/s id option [cmpVal, ...] - settings sensor\r\n"
+		"/s id option [params] - settings sensor\r\n"
 		"option:\r\n"
 		"\t '=' - set [cmpVal, ...]\r\n"
-		"/l option [frq,...] - setting and control led\r\n"
+		"/l option [params] - setting and control led\r\n"
 		"option:\r\n"
 		"\t '+' - led on\r\n"
 		"\t '-' - led off\r\n"
@@ -188,6 +188,7 @@ void cli_cmd_parser(uint8_t * cmd){
 							"state: %d\r\n"
 							"dir: %d\r\n"
 							"speed: %d\r\n"
+							"accel: %d\r\n"
 							"deg_speed_set / deg_speed: %lu / %lu\r\n"
 							"dist / pos: %ld / %ld\r\n"
 							"pos_0 / pos_90: %ld / %ld\r\n",
@@ -195,6 +196,7 @@ void cli_cmd_parser(uint8_t * cmd){
 							dom_motor_state(id),
 							dom_motor_dir(id),
 							dom_motor_speed(id),
+							dom_pwm_accel(),
 							dom_motor_deg_speed(id), motor_deg_speed(get_motor(id)),
 							dom_motor_dist(id), dom_motor_pos(id),
 							dom_motor_pos_0(id), dom_motor_pos_90(id)
@@ -310,11 +312,12 @@ void cli_cmd_parser(uint8_t * cmd){
 			}
 			id = atoi(p);
 			p = strtok(NULL, sep);
-			if(p == NULL){
+			if(p == NULL || id == 0 || id > MOTOR_COUNT){
 				slen = sprintf(cbuf, "\r\nincorrect command");
 				sender(cbuf, slen);
 				return;
 			}
+			id -= 1;
 			switch(*p){
 				case '>':
 					dom_motor_forward(id, dom_pwm_full());
@@ -331,7 +334,7 @@ void cli_cmd_parser(uint8_t * cmd){
 						param[iparam] = atoi(p);
 						++iparam;
 					}
-					result = dom_motor_set(id, param[0], param[1], param[2]);
+					result = dom_motor_set(id, param[0], param[1], param[2], param[3], param[4]);
 					slen = sprintf(cbuf, "\n%s", result > 0 ? "fail" : "done");
 					sender(cbuf, slen);
 				break;

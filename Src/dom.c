@@ -224,7 +224,7 @@ void dom_init(){
 			dom_settings.motor_settings[i].deg_speed = MOTOR_DEG_SPEED_DEF;
 			dom_settings.motor_settings[i].dir = MOTOR_DIR_DEF;
 		}
-		motor_set(&motor[i], dom_settings.pwm_break, dom_settings.motor_settings[i].deg_speed, dom_settings.pwm_accel);
+		motor_set(&motor[i], dom_settings.motor_settings[i].dir, dom_settings.pwm_break, dom_settings.motor_settings[i].deg_speed, dom_settings.pwm_accel);
 	}
 	for(uint16_t i = 0; i < RELE_COUNT; ++i){
 		rele_inactive(&rele[i]);
@@ -518,43 +518,40 @@ int8_t dom_motor_dir(uint8_t id){
 		return -1;
 	return motor_dir(&motor[id-1]);
 }
-uint8_t dom_motor_set(uint8_t id, int16_t speed, int16_t min_speed, int16_t deg_speed){
+uint8_t dom_motor_set(uint8_t id, int8_t dir, int16_t speed, int16_t min_speed, int16_t deg_speed, int16_t accel){
 
-	// return 0 - no error, 1 -error
-	if(id == 0 || id > MOTOR_COUNT || speed > MOTOR_SPEED_MAX){
-		return 1;
+	if(~dir){
+		dom_settings.motor_settings[id].dir = dir;
 	}
-
+	if(deg_speed != -1){
+		dom_settings.motor_settings[id].deg_speed = deg_speed;
+	}
 	if(speed != -1){
 		dom_settings.pwm_full = speed;
 	}
 	if(min_speed != -1){
 		dom_settings.pwm_break = min_speed;
 	}
-	if(deg_speed != -1){
-		dom_settings.motor_settings[id - 1].deg_speed = deg_speed;
+	if(~accel){
+		dom_settings.pwm_accel = accel;
 	}
 
-	if(speed != -1 || deg_speed != -1 || min_speed != -1){
+	motor_set(&motor[id], dir, speed, deg_speed, accel);
+
+	if(~dir || speed != -1 || deg_speed != -1 || min_speed != -1){
 		return settings_write(&dom_settings);
 	}
 
 	return 1;
 }
 void dom_motor_forward(uint8_t id, uint16_t speed){
-	if(id == 0 || id > MOTOR_COUNT)
-		return;
-	motor_forward(&motor[id-1], speed);
+	motor_forward(&motor[id], speed);
 }
 void dom_motor_back(uint8_t id, uint16_t speed){
-	if(id == 0 || id > MOTOR_COUNT)
-		return;
-	motor_back(&motor[id-1], speed);
+	motor_back(&motor[id], speed);
 }
 void dom_motor_stop(uint8_t id){
-	if(id == 0 || id > MOTOR_COUNT)
-		return;
-	motor_stop(&motor[id-1]);
+	motor_stop(&motor[id]);
 }
 int32_t dom_motor_pos(uint8_t id){
 	return motor_pos(&motor[id]);

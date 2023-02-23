@@ -95,16 +95,19 @@ void motor_back(xMotor_tt * m, uint16_t speed){
 	motor_pos_start(m, calc_pos_dec);
 }
 
-void motor_set(xMotor_tt * m, int16_t speed, int16_t deg_speed, int16_t accel){
+void motor_set(xMotor_tt * m, int8_t dir, int16_t speed, int16_t deg_speed, int16_t accel){
 
-	if(~accel){
-		m->accel = accel;
+	if(~dir){
+		m->dir = dir;
 	}
-	if(speed != -1){
+	if(~speed){
 		m->speed = speed;
 	}
-	if(deg_speed != -1){
+	if(~deg_speed){
 		m->deg_speed = deg_speed;
+	}
+	if(~accel){
+		m->accel = accel;
 	}
 }
 uint16_t motor_speed(xMotor_tt *m){
