@@ -6,6 +6,11 @@
  */
 #include "gate.h"
 
+xTimer_tt timer_sensor_led_1_error;
+xTimer_tt timer_sensor_led_2_error;
+
+void on_timer_sensor_led_error(xTimer_tt * t, void * thisArg);
+
 
 
 
@@ -104,31 +109,6 @@ void gate_init(){
 	gates[GATE_2].angle = -1;
 	gate_stop(&gates[GATE_1]);
 	gate_stop(&gates[GATE_2]);
-
-	uint8_t is_detected_g1 = 0;
-	uint8_t is_detected_g2 = 0;
-	for(uint8_t i = 0; i < 4; ++i){
-		if(dom_sensor_is_detected(gates[GATE_1].sid[i])){
-			is_detected_g1 = 1;
-		}
-		if(dom_sensor_is_detected(gates[GATE_2].sid[i])){
-			is_detected_g2 = 1;
-		}
-	}
-
-	if(is_detected_g1){
-		dom_led_on(LED_OPEN_CLOSE_GATE_1);
-	}
-	else{
-		dom_led_off(LED_OPEN_CLOSE_GATE_1);
-	}
-
-	if(is_detected_g2){
-		dom_led_on(LED_OPEN_CLOSE_GATE_2);
-	}
-	else{
-		dom_led_off(LED_OPEN_CLOSE_GATE_2);
-	}
 }
 
 xGate_tt * get_gate(GATE_ENUM id){
@@ -239,12 +219,6 @@ void gate_change(GATE_ENUM id, GATE_STATE_ENUM new_state){
 	}
 	else{
 		dom_led_on(LED_MOTOR_MOVE);
-		if(id == GATE_1){
-			dom_led_off(LED_OPEN_CLOSE_GATE_1);
-		}
-		if(id == GATE_2){
-			dom_led_off(LED_OPEN_CLOSE_GATE_2);
-		}
 	}
 
 	gate_notify(id);
@@ -264,12 +238,6 @@ void gate_leaf_1_stop(xGate_tt * g){
 	}
 
 	if(dom_motor_state(g->mid[1]) == MOTOR_STATE_STOP){
-		if(g->id == GATE_1){
-			dom_led_on(LED_OPEN_CLOSE_GATE_1);
-		}
-		if(g->id == GATE_2){
-			dom_led_on(LED_OPEN_CLOSE_GATE_2);
-		}
 		gate_change(g->id, GATE_STATE_STOP);
 	}
 }
@@ -283,12 +251,6 @@ void gate_leaf_2_stop(xGate_tt * g){
 		dom_motor_save_pos_90(g->mid[1]);
 	}
 	if(dom_motor_state(g->mid[0]) == MOTOR_STATE_STOP){
-		if(g->id == GATE_1){
-			dom_led_on(LED_OPEN_CLOSE_GATE_1);
-		}
-		if(g->id == GATE_2){
-			dom_led_on(LED_OPEN_CLOSE_GATE_2);
-		}
 		gate_change(g->id, GATE_STATE_STOP);
 	}
 }
@@ -336,6 +298,31 @@ void on_sensor_rain_detected(uint8_t id){
 
 void gate_poll(uint8_t id){
 	uint16_t deg = cupol_encoder(id);
+
+	uint8_t id_close_1 =  gates[id].sid[0];
+	uint8_t id_close_2 =  gates[id].sid[2];
+
+	uint8_t id_open_1 = gates[id].sid[1];
+	uint8_t id_open_2 = gates[id].sid[3];
+
+	uint8_t sensor_st = 0;
+
+	sensor_st = (dom_sensor_is_detected(id_close_1) << 0) | (dom_sensor_is_detected(id_close_2) << 2)
+			| (dom_sensor_is_detected(id_open_1) << 1) | (dom_sensor_is_detected(id_open_1) << 3);
+
+	if(sensor_st == 0x05 || sensor_st == 0xA ){
+		if(id == GATE_1){
+			dom_led_on(LED_OPEN_CLOSE_GATE_1);
+		}
+		if(id == GATE_2){
+			dom_led_on(LED_OPEN_CLOSE_GATE_2);
+		}
+	}
+	else{
+		timer_set(&timer_sensor_led_1_error, 300, on_timer_sensor_led_error, &gates[id]);
+	}
+
+
 	if(~gates[id].angle){
 		if(gates[id].state == GATE_STATE_ClOSING){
 			if(deg >= gates[id].angle){
@@ -467,6 +454,17 @@ int32_t cupol_pos(uint8_t id){
 uint8_t cupol_move_params_set(uint16_t pwm_break, uint16_t pwm_full, uint16_t accel, uint16_t angle_break, float koef1, float koef2, uint8_t rain_inf){
 	uint8_t result = dom_move_params_set(pwm_break, pwm_full, accel, angle_break, koef1, koef2, rain_inf);
 	return result;
+}
+
+void on_timer_sensor_led_error(xTimer_tt * t, void * thisArg){
+	xGate_tt * g = thisArg;
+	timer_reset(t);
+	if(g == &gates[GATE_1]){
+		dom_led_toggle(LED_OPEN_CLOSE_GATE_1);
+	}
+	if(g == &gates[GATE_2]){
+		dom_led_toggle(LED_OPEN_CLOSE_GATE_2);
+	}
 }
 
 

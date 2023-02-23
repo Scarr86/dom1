@@ -24,3 +24,11 @@ void led_hard_off(xLed_tt * led){
 void led_update(xLed_tt * led){
 	HAL_GPIO_WritePin(led->GPIOx, led->pin, led->state);
 }
+void led_toggle(xLed_tt * led){
+	if(led->state == GPIO_PIN_SET){
+		led_on(led);
+	}
+	else{
+		led_off(led);
+	}
+}

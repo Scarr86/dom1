@@ -145,6 +145,7 @@ void dom_btn_4_on_click();
 // LED START
 void dom_led_on(uint8_t id);
 void dom_led_off(uint8_t id);
+void dom_led_toggle(uint8_t id);
 // LED END
 
 // LED-PWM START

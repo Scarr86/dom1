@@ -255,7 +255,7 @@ void handler_cmd_set_move_params(uint8_t * params, uint16_t len){
 		i += 1;
 	}
 	if(i == sizeof val / 2){
-		if(cupol_move_params_set(val[0], val[1], val[2], val[3], val[4], val[5], val[6])){
+		if(cupol_move_params_set(val[0], val[1], val[2], val[3], val[4], val[5], val[6]) == 0){
 			sender("OK\r", 4);
 		}
 		else{

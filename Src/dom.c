@@ -398,6 +398,9 @@ void dom_led_on(uint8_t id){
 void dom_led_off(uint8_t id){
 	led_off(&led[id]);
 }
+void dom_led_toggle(uint8_t id){
+	led_toggle(&led[id]);
+}
 // LED FUNCTION END
 
 // LED-PWM FUNCTION START
