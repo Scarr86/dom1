@@ -526,9 +526,7 @@ int16_t dom_motor_deg_speed(uint8_t id){
 	return dom_settings.motor_settings[id].deg_speed;
 }
 int8_t dom_motor_dir(uint8_t id){
-	if(id == 0 || id > MOTOR_COUNT)
-		return -1;
-	return motor_dir(&motor[id-1]);
+	return motor_dir(&motor[id]);
 }
 uint8_t dom_motor_set(uint8_t id, int8_t dir, int16_t speed, int16_t min_speed, int16_t deg_speed, int16_t accel){
 

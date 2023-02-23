@@ -117,9 +117,7 @@ uint16_t motor_deg_speed(xMotor_tt * m){
 	return ( motor_dist(m) / 90) / (1000 / DIST_TIMER_GAP);
 }
 int8_t motor_dir(xMotor_tt *m){
-	if(m->GPIOx && m->pin)
-		return HAL_GPIO_ReadPin(m->GPIOx, m->pin);
-	return -1;
+	return m->dir;
 }
 uint8_t motor_state(xMotor_tt * m){
 	return m->state;
