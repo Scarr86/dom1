@@ -18,6 +18,14 @@ typedef enum{
 	LED_BLINK_ON
 }LED_MODE;
 
+typedef enum{
+	LED_PWM_ON,
+	LED_PWM_OFF,
+	LED_PWM_BLINK
+}LED_PWM_STATE;
+
+
+
 typedef struct{
 	uint32_t ccr;
 	int16_t step;
@@ -25,8 +33,10 @@ typedef struct{
 	xTimer_tt timer;
 	LED_MODE mode;
 	uint16_t frq;
+	uint8_t state;
 }xLed_pwm_tt;
 
+void led_pwm_update(xLed_pwm_tt * led);
 void led_pwm_on(xLed_pwm_tt * led);
 void led_pwm_off(xLed_pwm_tt * led);
 void led_pwm_blink(xLed_pwm_tt * led , uint32_t frq);
@@ -35,6 +45,7 @@ void led_pwm_on_timeout(xTimer_tt * t, void * thisArg);
 uint8_t led_pwm_state(xLed_pwm_tt * led);
 uint8_t led_pwm_mode(xLed_pwm_tt * led);
 uint16_t led_pwm_frq(xLed_pwm_tt * led);
+
 
 
 

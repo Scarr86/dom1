@@ -13,6 +13,8 @@
 //uint16_t pwm_accel;
 //uint16_t angle_break;
 
+uint8_t sw_led_off = 0;
+
 
 xLed_pwm_tt led_pwm = {
 		.ccr = (uint32_t)&TIM1->CCR2,
@@ -191,6 +193,7 @@ uint8_t settings_is_valid;
 
 
 void dom_init(){
+	sw_led_off = HAL_GPIO_ReadPin(SW_LED_OFF_GPIO_Port, SW_LED_OFF_Pin);
 
 	settings_is_valid  = settings_read(&dom_settings);
 	//settings_is_valid  = 0;
@@ -242,14 +245,15 @@ void dom_init(){
 	}
 
 
-
-
 	for(uint8_t i = 0; i < 5; ++i ){
 		led_pwm_off(&led_pwm);
 		HAL_Delay(300);
 		led_pwm_on(&led_pwm);
 		HAL_Delay(300);
 	}
+
+	for(uint16_t  i = 0; i < LED_COUNT; ++i)
+		dom_led_off(i);
 
 	//motor_forward(&motor[MOTOR_5]);
 	//led_pwm_blink(&led_pwm, 4);
@@ -266,6 +270,16 @@ void dom_poll(){
 	}
 	for(uint16_t i = 0; i < SENSOR_RAIN_COUNT; ++i){
 		sensor_rain_poll(&sensor_rain[i]);
+	}
+	
+	if(sw_led_off != HAL_GPIO_ReadPin(SW_LED_OFF_GPIO_Port, SW_LED_OFF_Pin)){
+		sw_led_off = !sw_led_off;
+		if(sw_led_off == 0){
+			for(uint16_t i = 0; i < LED_COUNT; ++i){
+				led_update(&led[i]);
+			}
+			led_pwm_update(&led_pwm);
+		}
 	}
 
 }

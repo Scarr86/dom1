@@ -61,6 +61,8 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define SENSOR_RAIN_Pin GPIO_PIN_3
 #define SENSOR_RAIN_GPIO_Port GPIOF
+#define SW_LED_OFF_Pin GPIO_PIN_5
+#define SW_LED_OFF_GPIO_Port GPIOF
 #define SS_REL_3_Pin GPIO_PIN_11
 #define SS_REL_3_GPIO_Port GPIOF
 #define SS_REL_2_Pin GPIO_PIN_12

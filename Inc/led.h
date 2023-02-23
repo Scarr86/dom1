@@ -13,10 +13,12 @@
 typedef struct{
 	GPIO_TypeDef * GPIOx;
 	uint32_t pin;
+	uint8_t state;
 }xLed_tt;
 
 void led_on(xLed_tt * led);
 void led_off(xLed_tt * led);
+void led_update(xLed_tt * led);
 
 
 #endif /* LED_H_ */

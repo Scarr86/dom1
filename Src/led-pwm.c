@@ -7,14 +7,29 @@
 
 #include <led-pwm.h>
 
+
+void led_pwm_update(xLed_pwm_tt * led){
+	if(led->state == LED_PWM_ON)
+		led_pwm_on(led);
+	if(led->state == LED_PWM_OFF){
+		led_pwm_off(led);
+	}
+	if(led->state == LED_PWM_BLINK){
+		led_pwm_blink(led, led->frq);
+	}
+}
 void led_pwm_on(xLed_pwm_tt * led){
 	led->mode = LED_BLINK_OFF;
+	led->state = LED_PWM_ON;
 	timer_stop(&led->timer);
 	led->pwm_value = LED_MIN;
-	*((uint32_t *)led->ccr) = led->pwm_value;
+	if(!HAL_GPIO_ReadPin(SW_LED_OFF_GPIO_Port, SW_LED_OFF_Pin)){
+		*((uint32_t *)led->ccr) = led->pwm_value;
+	}
 }
 void led_pwm_off(xLed_pwm_tt * led){
 	led->mode = LED_BLINK_OFF;
+	led->state = LED_PWM_OFF;
 	timer_stop(&led->timer);
 	led->pwm_value = LED_MAX;
 	*((uint32_t *)led->ccr) = led->pwm_value;
@@ -28,9 +43,12 @@ void led_pwm_blink(xLed_pwm_tt * led , uint32_t frq){
 		return;
 	}
 	led->mode = LED_BLINK_ON;
+	led->state = LED_PWM_BLINK;
 	led->frq = frq;
 	led->pwm_value = LED_MAX;
-	timer_set(&led->timer, frq, led_pwm_on_timeout, led);
+	if(!HAL_GPIO_ReadPin(SW_LED_OFF_GPIO_Port, SW_LED_OFF_Pin)){
+		timer_set(&led->timer, frq, led_pwm_on_timeout, led);
+	}
 }
 
 uint8_t led_pwm_state(xLed_pwm_tt * led){

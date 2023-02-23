@@ -111,7 +111,7 @@ int main(void)
   MX_TIM12_Init();
   MX_TIM1_Init();
   MX_TIM3_Init();
-  MX_IWDG_Init();
+ // MX_IWDG_Init(); // todo debug iwdg
   MX_UART4_Init();
   /* USER CODE BEGIN 2 */
 
@@ -461,11 +461,11 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOE, LED_MOTOR_MOVE_Pin|LED_OPEN_CLOSE_GATE_1_Pin|LED_OPEN_CLOSE_GATE_2_Pin|LED_RAIN_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : SENSOR_RAIN_Pin */
-  GPIO_InitStruct.Pin = SENSOR_RAIN_Pin;
+  /*Configure GPIO pins : SENSOR_RAIN_Pin SW_LED_OFF_Pin */
+  GPIO_InitStruct.Pin = SENSOR_RAIN_Pin|SW_LED_OFF_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(SENSOR_RAIN_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
 
   /*Configure GPIO pins : SS_REL_3_Pin SS_REL_2_Pin SS_REL_1_Pin GP_REL_3_Pin
                            GP_REL_2_Pin */

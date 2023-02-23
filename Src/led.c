@@ -9,9 +9,15 @@
 #include "led.h"
 
 void led_on(xLed_tt * led){
-	HAL_GPIO_WritePin(led->GPIOx, led->pin, GPIO_PIN_RESET);
+	led->state = GPIO_PIN_RESET;
+	if(!HAL_GPIO_ReadPin(SW_LED_OFF_GPIO_Port, SW_LED_OFF_Pin))
+		led_update(led);
 }
 
 void led_off(xLed_tt * led){
-	HAL_GPIO_WritePin(led->GPIOx, led->pin, GPIO_PIN_SET);
+	led->state = GPIO_PIN_SET;
+	led_update(led);
+}
+void led_update(xLed_tt * led){
+	HAL_GPIO_WritePin(led->GPIOx, led->pin, led->state);
 }

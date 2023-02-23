@@ -102,6 +102,33 @@ void gate_init(){
 	dom_sensor_rain_subscribe(on_sensor_rain_detected);
 	gates[GATE_1].angle = -1;
 	gates[GATE_2].angle = -1;
+	gate_stop(&gates[GATE_1]);
+	gate_stop(&gates[GATE_2]);
+
+	uint8_t is_detected_g1 = 0;
+	uint8_t is_detected_g2 = 0;
+	for(uint8_t i = 0; i < 4; ++i){
+		if(dom_sensor_is_detected(gates[GATE_1].sid[i])){
+			is_detected_g1 = 1;
+		}
+		if(dom_sensor_is_detected(gates[GATE_2].sid[i])){
+			is_detected_g2 = 1;
+		}
+	}
+
+	if(is_detected_g1){
+		dom_led_on(LED_OPEN_CLOSE_GATE_1);
+	}
+	else{
+		dom_led_off(LED_OPEN_CLOSE_GATE_1);
+	}
+
+	if(is_detected_g2){
+		dom_led_on(LED_OPEN_CLOSE_GATE_2);
+	}
+	else{
+		dom_led_off(LED_OPEN_CLOSE_GATE_2);
+	}
 }
 
 xGate_tt * get_gate(GATE_ENUM id){
@@ -154,33 +181,25 @@ void gate_notify(GATE_ENUM id){
 }
 
 void gate_close(xGate_tt * g){
-	xSensor_tt * s1 = get_sensor(g->sid[0]);
-	xSensor_tt * s2 = get_sensor(g->sid[2]);
-	xMotor_tt * m1 = get_motor(g->mid[0]);
-	xMotor_tt * m2 = get_motor(g->mid[1]);
-	uint8_t is_detected_s1 = sensor_is_detected(s1);
-	uint8_t is_detected_s2 = sensor_is_detected(s2);
+	uint8_t is_detected_s1 = dom_sensor_is_detected(g->sid[0]);
+	uint8_t is_detected_s2 = dom_sensor_is_detected(g->sid[2]);
 	uint16_t speed = gate_speed(g->id);
 	if(!is_detected_s1 || !is_detected_s2){
 		gate_change(g->id, GATE_STATE_ClOSING);
 		g->speed = speed;
 	}
 	if(!is_detected_s1){
-		motor_forward(m1, gate_speed(g->id));
+		dom_motor_forward(g->mid[0], gate_speed(g->id));
 	}
 	if(!is_detected_s2){
-		motor_forward(m2, gate_speed(g->id));
+		dom_motor_forward(g->mid[1], gate_speed(g->id));
 	}
 
 }
 
 void gate_open(xGate_tt * g){
-	xSensor_tt * s1 = get_sensor(g->sid[1]);
-	xSensor_tt * s2 = get_sensor(g->sid[3]);
-	xMotor_tt * m1 = get_motor(g->mid[0]);
-	xMotor_tt * m2 = get_motor(g->mid[1]);
-	uint8_t is_detected_s1 = sensor_is_detected(s1);
-	uint8_t is_detected_s2 = sensor_is_detected(s2);
+	uint8_t is_detected_s1 = dom_sensor_is_detected(g->sid[1]);
+	uint8_t is_detected_s2 = dom_sensor_is_detected(g->sid[3]);
 	uint16_t speed = gate_speed(g->id);
 
 	if(!is_detected_s1 || !is_detected_s2){
@@ -193,7 +212,7 @@ void gate_open(xGate_tt * g){
 //			motor_back(m1, dom_pwm_full());
 //		else // если подходим к границе
 //			motor_back(m1, dom_pwm_break());
-		motor_back(m1, speed);
+		dom_motor_back(g->mid[0], speed);
 	}
 	if(!is_detected_s2){
 //		// если в середине движения
@@ -201,16 +220,14 @@ void gate_open(xGate_tt * g){
 //			motor_back(m2, dom_pwm_full());
 //		else// если подходим к границе
 //			motor_back(m2, dom_pwm_break());
-		motor_back(m2, speed);
+		dom_motor_back(g->mid[1], speed);
 	}
 
 }
 void gate_stop(xGate_tt * g){
-	xMotor_tt * m1 = get_motor(g->mid[0]);
-	xMotor_tt * m2 = get_motor(g->mid[1]);
 	gate_change(g->id, GATE_STATE_STOP);
-	motor_stop(m1);
-	motor_stop(m2);
+	dom_motor_stop(g->mid[0]);
+	dom_motor_stop(g->mid[1]);
 	g->speed = 0;
 }
 
@@ -238,17 +255,15 @@ void gate_leaf_stop_def(){
 }
 
 void gate_leaf_1_stop(xGate_tt * g){
-	xMotor_tt * m1 = get_motor(g->mid[0]);
-	xMotor_tt * m2 = get_motor(g->mid[1]);
-	motor_stop(m1);
+	dom_motor_stop(g->mid[0]);
 	if(g->state == GATE_STATE_OPENING){
-		motor_save_pos_0(m1);
+		dom_motor_save_pos_0(g->mid[0]);
 	}
 	if(g->state == GATE_STATE_ClOSING){
-		motor_save_pos_90(m1);
+		dom_motor_save_pos_90(g->mid[0]);
 	}
 
-	if(motor_state(m2) == MOTOR_STATE_STOP){
+	if(dom_motor_state(g->mid[1]) == MOTOR_STATE_STOP){
 		if(g->id == GATE_1){
 			dom_led_on(LED_OPEN_CLOSE_GATE_1);
 		}
@@ -260,16 +275,14 @@ void gate_leaf_1_stop(xGate_tt * g){
 }
 
 void gate_leaf_2_stop(xGate_tt * g){
-	xMotor_tt * m1 = get_motor(g->mid[0]);
-	xMotor_tt * m2 = get_motor(g->mid[1]);
-	motor_stop(m2);
+	dom_motor_stop(g->mid[1]);
 	if(g->state == GATE_STATE_OPENING){
-		motor_save_pos_0(m2);
+		dom_motor_save_pos_0(g->mid[1]);
 	}
 	if(g->state == GATE_STATE_ClOSING){
-		motor_save_pos_90(m2);
+		dom_motor_save_pos_90(g->mid[1]);
 	}
-	if(motor_state(m1) == MOTOR_STATE_STOP){
+	if(dom_motor_state(g->mid[0]) == MOTOR_STATE_STOP){
 		if(g->id == GATE_1){
 			dom_led_on(LED_OPEN_CLOSE_GATE_1);
 		}
@@ -398,16 +411,17 @@ uint8_t cupol_state(uint8_t id){
 }
 
 uint8_t dome_status(uint8_t id){
-	xSensor_tt * s_close_1 = get_sensor(gates[id].sid[0]);
-	xSensor_tt * s_close_2 = get_sensor(gates[id].sid[2]);
+	uint8_t id_close_1 =  gates[id].sid[0];
+	uint8_t id_close_2 =  gates[id].sid[2];
 
-	xSensor_tt * s_open_1 = get_sensor(gates[id].sid[1]);
-	xSensor_tt * s_open_2 = get_sensor(gates[id].sid[3]);
+	uint8_t id_open_1 = gates[id].sid[1];
+	uint8_t id_open_2 = gates[id].sid[3];
 
-	if(sensor_is_detected(s_close_1) && sensor_is_detected(s_close_2)){
+
+	if(dom_sensor_is_detected(id_close_1) && dom_sensor_is_detected(id_close_2)){
 		return 0;
 	}
-	if(sensor_is_detected(s_open_1) && sensor_is_detected(s_open_2)){
+	if(dom_sensor_is_detected(id_open_1) && dom_sensor_is_detected(id_open_2)){
 		return 1;
 	}
 	return 3;
