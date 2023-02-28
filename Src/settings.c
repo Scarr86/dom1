@@ -24,7 +24,7 @@ uint16_t flash_write(void * data, uint32_t len){
 
 	HAL_FLASH_Unlock();
 	for(uint32_t i = 0; i < len; ++i){
-		HAL_IWDG_Refresh(&hiwdg);
+		HAL_IWDG_Refresh(&hiwdg);  //todo iwdg
 		result = flash_write_byte(d[i], flash_address + i);
 		if(result != HAL_OK){
 			break;

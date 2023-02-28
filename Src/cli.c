@@ -48,7 +48,7 @@ const char * help = "\r\n/h - help\r\n"
 		"option:\r\n"
 		"\t '+' - led on\r\n"
 		"\t '-' - led off\r\n"
-		"\t '~' - led blink mode [frq, ...]";
+		"\t '~' - led blink mode [frq, ...]\r\n";
 
 char cbuf[CLI_BUF_SIZE];
 uint8_t tbuf[80];
@@ -57,12 +57,20 @@ uint8_t cbuf_owf;
 
 cli_sender_tt sender;
 
+static cli_sender_tt cli_save_sender;
+
+static xUart_tt * cli_sender = NULL;
+
 uint8_t def_sender(uint8_t * buf, uint16_t len);
 void parser_btn(uint8_t id, uint8_t * p);
 
 
 uint8_t def_sender(uint8_t * buf, uint16_t len){
-	return 0;
+	if(cli_sender){
+		uart_send(cli_sender, buf, len );
+		return 0;
+	}
+	return 1;
 }
 
 void cli_init(cli_sender_tt cli_sender){
@@ -73,6 +81,14 @@ void cli_init(cli_sender_tt cli_sender){
 	dom_btn_subscribe(cli_btn_on_click);
 	dom_sensor_subscribe(cli_sensor_on_detected);
 	gate_subscribe(cli_gate_change);
+}
+
+void cli_parser_from_uart(xUart_tt * uart, uint8_t * buf, uint16_t len){
+	cli_sender = uart;
+	cli_save_sender = sender;
+	sender = def_sender;
+	cli_parser(buf, len);
+	sender = cli_save_sender;
 }
 
 void cli_parser(uint8_t * buf, uint16_t len){
@@ -92,7 +108,6 @@ void cli_parser(uint8_t * buf, uint16_t len){
 			char * cmd_start = memchr(cbuf, '/', line_feed - cbuf );
 			if(cmd_start){
 				cli_cmd_parser(cmd_start + 1 );
-				sender("\r\n", 2);
 			}
 
 			cbuf_len -= line_feed + 1 - cbuf;
@@ -162,7 +177,7 @@ void cli_cmd_parser(uint8_t * cmd){
 					p = strtok(NULL, sep);
 					if(p ==  NULL){
 						for(uint8_t i = 0; i < SENSOR_COUNT; ++i){
-							sprintf(tbuf, "? s %d", i+1);
+							sprintf(tbuf, "? s %d\r\n", i+1);
 							cli_cmd_parser(tbuf);
 						}
 						return;
@@ -178,14 +193,14 @@ void cli_cmd_parser(uint8_t * cmd){
 					p = strtok(NULL, sep);
 					if(p == NULL){
 						for(uint8_t i = 0; i < MOTOR_COUNT; ++i){
-							sprintf(tbuf, "? m %d", i+1);
+							sprintf(tbuf, "? m %d\r\n", i+1);
 							cli_cmd_parser(tbuf);
 						}
 						return;
 					}
 					id = atoi(p);
 					if(id == 0 || id > MOTOR_COUNT){
-						slen = sprintf(cbuf, "\r\nincorrect command");
+						slen = sprintf(cbuf, "\r\nincorrect command\r\n");
 						sender(cbuf, slen);
 						return;
 					}
@@ -220,7 +235,7 @@ void cli_cmd_parser(uint8_t * cmd){
 					}
 					id = atoi(p);
 					if(id == 0 || id > GATE_COUNT){
-						slen = sprintf(cbuf, "\r\nincorrect command");
+						slen = sprintf(cbuf, "\r\nincorrect command\r\n");
 						sender(cbuf, slen);
 						return;
 					}
@@ -249,7 +264,7 @@ void cli_cmd_parser(uint8_t * cmd){
 					}
 					id = atoi(p);
 					if(id == 0 || id > ODOMETER_COUNT){
-						slen = sprintf(cbuf, "\r\nincorrect command");
+						slen = sprintf(cbuf, "\r\nincorrect command\r\n");
 						sender(cbuf, slen);
 					}
 					else{
@@ -267,7 +282,7 @@ void cli_cmd_parser(uint8_t * cmd){
 						sender(cbuf, slen);
 				break;
 				default:
-					slen = sprintf(cbuf, "\r\nincorrect command");
+					slen = sprintf(cbuf, "\r\nincorrect command\r\n");
 					sender(cbuf, slen);
 				break;
 			}
@@ -279,7 +294,7 @@ void cli_cmd_parser(uint8_t * cmd){
 			id = atoi(p);
 			p = strtok(NULL, sep);// read option
 			if(p == NULL || id == 0){
-				slen = sprintf(cbuf, "\r\nincorrect command");
+				slen = sprintf(cbuf, "\r\nincorrect command\r\n");
 				sender(cbuf, slen);
 				return;
 			}
@@ -288,7 +303,7 @@ void cli_cmd_parser(uint8_t * cmd){
 		case 'l':
 			p = strtok(NULL, sep);
 			if(p == NULL){
-				slen = sprintf(cbuf, "\r\nincorrect command");
+				slen = sprintf(cbuf, "\r\nincorrect command\r\n");
 				sender(cbuf, slen);
 				return;
 			}
@@ -307,11 +322,11 @@ void cli_cmd_parser(uint8_t * cmd){
 					else{
 						result = dom_led_pwm_set(0, LED_BLINK_ON, atoi(p));
 					}
-					slen = sprintf(cbuf, "\n%s", result > 0 ? "fail" : "done");
+					slen = sprintf(cbuf, "\r\n%s\r\n", result > 0 ? "fail" : "done");
 					sender(cbuf, slen);
 				break;
 				default:
-					slen = sprintf(cbuf, "\r\nincorrect command");
+					slen = sprintf(cbuf, "\r\nincorrect command\r\n");
 					sender(cbuf, slen);
 				break;
 			}
@@ -320,14 +335,14 @@ void cli_cmd_parser(uint8_t * cmd){
 		case 'm':
 			p = strtok(NULL, sep);
 			if(p == NULL){
-				slen = sprintf(cbuf, "\r\nincorrect command");
+				slen = sprintf(cbuf, "\r\nincorrect command\r\n");
 				sender(cbuf, slen);
 				return;
 			}
 			id = atoi(p);
 			p = strtok(NULL, sep);
 			if(p == NULL || id == 0 || id > MOTOR_COUNT){
-				slen = sprintf(cbuf, "\r\nincorrect command");
+				slen = sprintf(cbuf, "\r\nincorrect command\r\n");
 				sender(cbuf, slen);
 				return;
 			}
@@ -349,11 +364,11 @@ void cli_cmd_parser(uint8_t * cmd){
 						++iparam;
 					}
 					result = dom_motor_set(id, param[0], param[1], param[2], param[3], param[4]);
-					slen = sprintf(cbuf, "\n%s", result > 0 ? "fail" : "done");
+					slen = sprintf(cbuf, "\r\n%s\r\n", result > 0 ? "fail" : "done");
 					sender(cbuf, slen);
 				break;
 				default:
-					slen = sprintf(cbuf, "\r\nincorrect command");
+					slen = sprintf(cbuf, "\r\nincorrect command\r\n");
 					sender(cbuf, slen);
 				break;
 			}
@@ -365,7 +380,7 @@ void cli_cmd_parser(uint8_t * cmd){
 			id = atoi(p);
 			p = strtok(NULL, sep);// read option
 			if(p == NULL || id == 0){
-				slen = sprintf(cbuf, "\r\nincorrect command");
+				slen = sprintf(cbuf, "\r\nincorrect command\r\n");
 				sender(cbuf, slen);
 				return;
 			}
@@ -378,7 +393,7 @@ void cli_cmd_parser(uint8_t * cmd){
 					else{
 						result = dom_sensor_set(id, atoi(p));
 					}
-					slen = sprintf(cbuf, "\n%s", result > 0 ? "fail" : "done");
+					slen = sprintf(cbuf, "\r\n%s\r\n", result > 0 ? "fail" : "done");
 					sender(cbuf, slen);
 				break;
 			}
@@ -387,7 +402,7 @@ void cli_cmd_parser(uint8_t * cmd){
 		case 'p':
 			p = strtok(NULL, sep);// read option
 			if(p == NULL){
-				slen = sprintf(cbuf, "\r\nincorrect command");
+				slen = sprintf(cbuf, "\r\nincorrect command\r\n");
 				sender(cbuf, slen);
 				return;
 			}
@@ -395,21 +410,21 @@ void cli_cmd_parser(uint8_t * cmd){
 				case '=':
 					p = strtok(NULL, sep);
 					if(p == NULL){
-						slen = sprintf(cbuf, "\r\nincorrect command");
+						slen = sprintf(cbuf, "\r\nincorrect command\r\n");
 						sender(cbuf, slen);
 						return;
 					}
 					else{
 						result = pwdg_set_timeout(atoi(p));
 					}
-					slen = sprintf(cbuf, "\n%s", result > 0 ? "fail" : "done");
+					slen = sprintf(cbuf, "\r\n%s\r\n", result > 0 ? "fail" : "done");
 					sender(cbuf, slen);
 				break;
 			}
 		break;
 
 		default:
-			slen = sprintf(cbuf, "\r\nincorrect command");
+			slen = sprintf(cbuf, "\r\nincorrect command\r\n");
 			sender(cbuf, slen);
 		break;
 	}
@@ -419,7 +434,7 @@ void parser_btn(uint8_t id, uint8_t * p){
 	//char * p = strtok(cmd, sep);
 	uint16_t slen, result;
 	if(id == 0){
-		slen = sprintf(cbuf, "\r\nincorrect command");
+		slen = sprintf(cbuf, "\r\nincorrect command\r\n");
 		sender(cbuf, slen);
 		return;
 	}
@@ -439,11 +454,11 @@ void parser_btn(uint8_t id, uint8_t * p){
 			else{
 				result =dom_btn_set(id, atoi(p));
 			}
-			slen = sprintf(cbuf, "\n%s", result > 0 ? "fail" : "done");
+			slen = sprintf(cbuf, "\r\n%s\r\n", result > 0 ? "fail" : "done");
 			sender(cbuf, slen);
 		break;
 		default:
-			slen = sprintf(cbuf, "\r\nincorrect command");
+			slen = sprintf(cbuf, "\r\nincorrect command\r\n");
 			sender(cbuf, slen);
 		break;
 	}
@@ -464,4 +479,5 @@ static void cli_gate_change(GATE_ENUM id){
 	sprintf(tbuf, "/? g %d\r", id+1);
 	cli_parser(tbuf, strlen(tbuf));
 }
+
 

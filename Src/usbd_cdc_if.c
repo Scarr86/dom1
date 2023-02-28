@@ -343,12 +343,6 @@ static int8_t CDC_TransmitCplt_FS(uint8_t *Buf, uint32_t *Len, uint8_t epnum)
 }
 
 /* USER CODE BEGIN PRIVATE_FUNCTIONS_IMPLEMENTATION */
-uint16_t usb_receive(uint8_t ** buf){
-	*buf = &rx_buf[0];
-	uint16_t len = rx_len;
-	rx_len = 0;
-	return len;
-}
 
 uint8_t usb_send(uint8_t * buf, uint16_t len){
 

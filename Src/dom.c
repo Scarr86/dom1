@@ -296,10 +296,11 @@ void dom_poll(){
 
 	if(sw_pwdg_off != HAL_GPIO_ReadPin(SW_PWDG_OFF_GPIO_Port, SW_PWDG_OFF_Pin)){
 		sw_pwdg_off = !sw_pwdg_off;
-		if(sw_pwdg_off == 0)
-			timer_restart(&pwdg_timer);
-		else
+		if(sw_pwdg_off)
 			timer_stop(&pwdg_timer);
+		else
+			timer_restart(&pwdg_timer);
+
 	}
 }
 
@@ -707,13 +708,15 @@ uint8_t dom_move_params_set(uint16_t pwm_break, uint16_t pwm_full, uint16_t acce
 // Protocol watchdog start
 void pwdg_init(on_timeout_fn cb){
 	timer_set(&pwdg_timer, pwdg_timeout(), cb, NULL);
+	if(sw_pwdg_off){
+		timer_stop(&pwdg_timer);
+	}
 }
 uint8_t pwdg_set_timeout(uint16_t timeout){
 	dom_settings.pwdg_timeout = timeout;
-	if(sw_pwdg_off == 0){
-		pwdg_timer.interval = timeout;
+	pwdg_timer.interval = timeout;
+	if(sw_pwdg_off == 0)
 		timer_restart(&pwdg_timer);
-	}
 	return settings_write(&dom_settings);
 }
 void pwdg_refresh(){

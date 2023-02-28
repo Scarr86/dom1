@@ -17,7 +17,7 @@ void on_timer_sensor_led_error(xTimer_tt * t, void * thisArg);
 
 static void on_ckick_button(uint8_t id);
 static void on_sensor_detected(uint8_t id);
-static void on_sensor_rain_detected(uint8_t id);
+//static void on_sensor_rain_detected(uint8_t id);
 
 
 //typedef void (* sensor_rain_observers_fn)(uint8_t id);
@@ -104,7 +104,7 @@ static gate_observer_fn observer[4];
 void gate_init(){
 	dom_btn_subscribe(on_ckick_button);
 	dom_sensor_subscribe(on_sensor_detected);
-	dom_sensor_rain_subscribe(on_sensor_rain_detected);
+	//dom_sensor_rain_subscribe(on_sensor_rain_detected);
 	gates[GATE_1].angle = -1;
 	gates[GATE_2].angle = -1;
 	gate_stop(&gates[GATE_1]);
@@ -282,18 +282,18 @@ void on_sensor_detected(uint8_t id){
 	}
 }
 
-void on_sensor_rain_detected(uint8_t id){
-	if(id == SENSOR_RAIN_1){
-		if(dom_sensor_rain_is_detected(SENSOR_RAIN_1)){
-			dom_led_on(LED_RAIN);
-			cupol_open(GATE_1, 0);
-			cupol_open(GATE_2, 0);
-		}
-		else{
-			dom_led_off(LED_RAIN);
-		}
-	}
-}
+//void on_sensor_rain_detected(uint8_t id){
+//	if(id == SENSOR_RAIN_1){
+//		if(dom_sensor_rain_is_detected(SENSOR_RAIN_1)){
+//			dom_led_on(LED_RAIN);
+//			cupol_open(GATE_1, 0);
+//			cupol_open(GATE_2, 0);
+//		}
+//		else{
+//			dom_led_off(LED_RAIN);
+//		}
+//	}
+//}
 
 
 void gate_poll(uint8_t id){
@@ -373,6 +373,17 @@ void gate_poll(uint8_t id){
 void dome_poll(){
 	gate_poll(GATE_1);
 	gate_poll(GATE_2);
+
+	if(dom_sensor_rain_is_enable(SENSOR_RAIN_1)){
+		if(dom_sensor_rain_is_detected(SENSOR_RAIN_1)){
+			dom_led_on(LED_RAIN);
+			cupol_open(GATE_1, 0);
+			cupol_open(GATE_2, 0);
+		}
+		else{
+			dom_led_off(LED_RAIN);
+		}
+	}
 }
 
 //void dome_close(){
@@ -382,7 +393,7 @@ void dome_poll(){
 //	gate_close(&gates[GATE_2]);
 //}
 
-
+// открыть на 0 градусов - закрывает купол
 void cupol_open(uint8_t id, uint16_t angle){
 
 	uint16_t deg = cupol_encoder(id);

@@ -109,7 +109,6 @@ typedef void (*usb_observers_tt)(uint8_t * buf, uint16_t len);
 uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len);
 
 /* USER CODE BEGIN EXPORTED_FUNCTIONS */
-uint16_t usb_receive(uint8_t ** buf);
 uint8_t usb_send(uint8_t * buf, uint16_t len);
 uint8_t usb_subscribe(usb_observers_tt obs);
 void usb_poll();

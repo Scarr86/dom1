@@ -50,17 +50,18 @@ void timer_request_poll(void){
 }
 uint8_t timers_poll(){
 	xTimer_tt * t;
-	if(!timer_request_poll_flag)
-		return 0;
-	for(t = timerlist; t != NULL; t = t->next ){
-		if(timer_expired(t)){
-			timer_del(t);
-			t->on_timeout(t, t->thisArg);
+
+	if(timer_request_poll_flag){
+		timer_request_poll_flag = 0;
+		for(t = timerlist; t != NULL; t = t->next ){
+			if(timer_expired(t)){
+				timer_del(t);
+				t->on_timeout(t, t->thisArg);
+			}
 		}
 	}
-	timer_request_poll_flag = 0;
-	return 1;
 
+	return 1;
 }
 
 //uint8_t timer_poll(xTimer_tt * t){

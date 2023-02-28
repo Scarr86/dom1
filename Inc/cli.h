@@ -14,12 +14,14 @@
 #include "gate.h"
 #include "stdio.h"
 #include "stdlib.h"
+#include "uart.h"
 
 
 typedef uint8_t (*cli_sender_tt)(uint8_t*, uint16_t);
 
 void cli_init(cli_sender_tt cli_sender);
 void cli_parser(uint8_t * buf, uint16_t len);
+void cli_parser_from_uart(xUart_tt * uart, uint8_t * buf, uint16_t len);
 
 
 

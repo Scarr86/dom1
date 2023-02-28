@@ -87,17 +87,31 @@ xCmd_tt cmds[] = {
 
 static protocol_sender_tt sender;
 
+static protocol_sender_tt save_sender;
+
+static xUart_tt * uart_sender = NULL;
+
 static uint8_t def_sender(char * buf, uint16_t len);
 
 uint8_t def_sender(char * buf, uint16_t len){
-
+	if(uart_sender)
+		uart_send(uart_sender, buf, len );
 }
 
 void protocol_init(protocol_sender_tt protocol_sender){
 	sender = protocol_sender ? protocol_sender: def_sender;
-
 	pwdg_init(on_pwdg_timeout);
 }
+
+
+void protocol_parser_from_uart(xUart_tt * uart, uint8_t * buf, uint16_t len){
+	uart_sender = uart;
+	save_sender = sender;
+	sender = def_sender;
+	protocol_parser(buf, len);
+	sender = save_sender;
+}
+
 void protocol_parser(uint8_t * buf, uint16_t len){
 
 	if(length + len < PROTOCOL_BUF_SIZE){
@@ -105,7 +119,7 @@ void protocol_parser(uint8_t * buf, uint16_t len){
 		length += len;
 
 		while(1){
-			uint8_t * feed = memchr(buffer, 0x0d, length );
+			uint8_t * feed = memchr(buffer, '\r', length );
 			if(feed == NULL)
 				break;
 			*feed = '\0';

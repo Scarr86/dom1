@@ -30,6 +30,7 @@
 #include "settings.h"
 #include "fletcher.h"
 #include "protocol.h"
+#include "uart.h"
 
 /* USER CODE END Includes */
 
@@ -40,6 +41,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define BUFFER_SIZE 32
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -55,8 +58,25 @@ TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim12;
 
 UART_HandleTypeDef huart4;
+UART_HandleTypeDef huart2;
+UART_HandleTypeDef huart3;
 
 /* USER CODE BEGIN PV */
+
+xUart_tt uart2 = {
+		.pxhuart = &huart2
+};
+
+xUart_tt uart3 = {
+		.pxhuart = &huart3
+};
+
+xUart_tt uart4 = {
+		.pxhuart = &huart4
+};
+
+uint8_t transmitBuffer[BUFFER_SIZE];
+uint8_t receiveBuffer[BUFFER_SIZE];
 
 
 /* USER CODE END PV */
@@ -69,6 +89,8 @@ static void MX_TIM1_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_IWDG_Init(void);
 static void MX_UART4_Init(void);
+static void MX_USART2_UART_Init(void);
+static void MX_USART3_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -76,7 +98,7 @@ static void MX_UART4_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-
+char * str = "/h\r";
 /* USER CODE END 0 */
 
 /**
@@ -113,6 +135,8 @@ int main(void)
   MX_TIM3_Init();
   MX_IWDG_Init();
   MX_UART4_Init();
+  MX_USART2_UART_Init();
+  MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
 
   HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
@@ -126,6 +150,9 @@ int main(void)
 
 
 
+
+
+
   dom_init();
   gate_init();
 
@@ -135,10 +162,38 @@ int main(void)
   usb_subscribe(protocol_parser);
   protocol_init(usb_send);
 
-  //HAL_UART_Receive_IT(huart, pData, Size)
 
-  //get_button(BUTTON_1)->on_click(); // todo debug
+  uart_init(&uart2);
+  uart_init(&uart3);
+  uart_init(&uart4);
 
+  uart_subscribe(&uart2, protocol_parser_from_uart);
+  uart_subscribe(&uart3, protocol_parser_from_uart);
+  uart_subscribe(&uart4, protocol_parser_from_uart);
+
+  uart_subscribe(&uart2, cli_parser_from_uart);
+  uart_subscribe(&uart3, cli_parser_from_uart);
+  uart_subscribe(&uart4, cli_parser_from_uart);
+
+  uart_send(&uart2, str, strlen(str));
+
+
+
+//  for (unsigned char i = 0; i < BUFFER_SIZE; i++)
+//   {
+//           transmitBuffer[i] = i + 1;
+//           receiveBuffer[i] = 0;
+//   }
+  //HAL_UART_Receive_IT(&huart2, receiveBuffer, strlen(str));
+  //HAL_UART_Transmit_IT(&huart2, transmitBuffer, BUFFER_SIZE);
+
+  //HAL_UART_Transmit_IT(&huart2, str, strlen(str));
+
+
+
+
+
+//
 
   /* USER CODE END 2 */
 
@@ -149,10 +204,11 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	HAL_IWDG_Refresh(&hiwdg);
+	HAL_IWDG_Refresh(&hiwdg);  //todo iwdg
 
 	timers_poll();
 	usb_poll();
+	uart_poll();
 	dom_poll();
 	dome_poll();
 
@@ -433,6 +489,72 @@ static void MX_UART4_Init(void)
 }
 
 /**
+  * @brief USART2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART2_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART2_Init 0 */
+
+  /* USER CODE END USART2_Init 0 */
+
+  /* USER CODE BEGIN USART2_Init 1 */
+
+  /* USER CODE END USART2_Init 1 */
+  huart2.Instance = USART2;
+  huart2.Init.BaudRate = 9600;
+  huart2.Init.WordLength = UART_WORDLENGTH_8B;
+  huart2.Init.StopBits = UART_STOPBITS_1;
+  huart2.Init.Parity = UART_PARITY_NONE;
+  huart2.Init.Mode = UART_MODE_TX_RX;
+  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART2_Init 2 */
+
+  /* USER CODE END USART2_Init 2 */
+
+}
+
+/**
+  * @brief USART3 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART3_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART3_Init 0 */
+
+  /* USER CODE END USART3_Init 0 */
+
+  /* USER CODE BEGIN USART3_Init 1 */
+
+  /* USER CODE END USART3_Init 1 */
+  huart3.Instance = USART3;
+  huart3.Init.BaudRate = 9600;
+  huart3.Init.WordLength = UART_WORDLENGTH_8B;
+  huart3.Init.StopBits = UART_STOPBITS_1;
+  huart3.Init.Parity = UART_PARITY_NONE;
+  huart3.Init.Mode = UART_MODE_TX_RX;
+  huart3.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart3.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART3_Init 2 */
+
+  /* USER CODE END USART3_Init 2 */
+
+}
+
+/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -540,6 +662,10 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+
+
+
 
 /* USER CODE END 4 */
 

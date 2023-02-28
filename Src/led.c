@@ -16,7 +16,8 @@ void led_on(xLed_tt * led){
 
 void led_off(xLed_tt * led){
 	led->state = GPIO_PIN_SET;
-	led_update(led);
+	if(!HAL_GPIO_ReadPin(SW_LED_OFF_GPIO_Port, SW_LED_OFF_Pin))
+		led_update(led);
 }
 void led_hard_off(xLed_tt * led){
 	HAL_GPIO_WritePin(led->GPIOx, led->pin, GPIO_PIN_SET);
