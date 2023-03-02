@@ -38,15 +38,16 @@ uint8_t uart_init(xUart_tt * uart){
 
 uint8_t uart_send(xUart_tt * uart, uint8_t * buf, uint16_t len){
 	HAL_StatusTypeDef result;
-	if(uart->tx_len + len >= UART_BUFFER_SIZE){
-		return 1;
-	}
+//	if(uart->tx_len + len >= UART_BUFFER_SIZE){
+//		return 1;
+//	}
 
 	if(uart->pxhuart->gState == HAL_UART_STATE_READY){
-		memcpy(&uart->tx_buf[0] + uart->tx_len, buf, len);
-		uart->tx_len += len;
-		result = HAL_UART_Transmit_IT(uart->pxhuart, uart->tx_buf, uart->tx_len);
-		uart->tx_len = 0;
+//		memcpy(&uart->tx_buf[0] + uart->tx_len, buf, len);
+//		uart->tx_len += len;
+		//result = HAL_UART_Transmit_IT(uart->pxhuart, uart->tx_buf, uart->tx_len,  UINT32_MAX);
+		result = HAL_UART_Transmit(uart->pxhuart, buf, len,  UINT32_MAX);
+		//uart->tx_len = 0;
 	}
 	else{
 		__NOP();

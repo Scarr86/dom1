@@ -18,7 +18,7 @@ typedef void (*uart_observer_tt)(struct xUart * uart, uint8_t * buf, uint16_t le
 typedef struct xUart{
 	uint8_t need_poll;
 	UART_HandleTypeDef * pxhuart;
-	FIFO(UART_BUFFER_SIZE) tx_fifo;
+	//FIFO(UART_BUFFER_SIZE) tx_fifo;
 	FIFO(UART_BUFFER_SIZE) rx_fifo;
  	uint8_t tx_buf[UART_BUFFER_SIZE];
 	uint16_t tx_len;

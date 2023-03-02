@@ -99,6 +99,10 @@ static void MX_USART3_UART_Init(void);
 /* USER CODE BEGIN 0 */
 
 char * str = "/h\r";
+
+//void send_tst_str(uint8_t id){
+//	uart_send(&uart2, str, strlen(str));
+//}
 /* USER CODE END 0 */
 
 /**
@@ -177,24 +181,7 @@ int main(void)
 
   uart_send(&uart2, str, strlen(str));
 
-
-
-//  for (unsigned char i = 0; i < BUFFER_SIZE; i++)
-//   {
-//           transmitBuffer[i] = i + 1;
-//           receiveBuffer[i] = 0;
-//   }
-  //HAL_UART_Receive_IT(&huart2, receiveBuffer, strlen(str));
-  //HAL_UART_Transmit_IT(&huart2, transmitBuffer, BUFFER_SIZE);
-
-  //HAL_UART_Transmit_IT(&huart2, str, strlen(str));
-
-
-
-
-
-//
-
+  //dom_btn_subscribe(send_tst_str);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -278,7 +265,7 @@ static void MX_IWDG_Init(void)
 
   /* USER CODE END IWDG_Init 1 */
   hiwdg.Instance = IWDG;
-  hiwdg.Init.Prescaler = IWDG_PRESCALER_32;
+  hiwdg.Init.Prescaler = IWDG_PRESCALER_128;
   hiwdg.Init.Reload = 4095;
   if (HAL_IWDG_Init(&hiwdg) != HAL_OK)
   {
