@@ -41,7 +41,6 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define BUFFER_SIZE 32
 
 /* USER CODE END PD */
 
@@ -74,9 +73,6 @@ xUart_tt uart3 = {
 xUart_tt uart4 = {
 		.pxhuart = &huart4
 };
-
-uint8_t transmitBuffer[BUFFER_SIZE];
-uint8_t receiveBuffer[BUFFER_SIZE];
 
 
 /* USER CODE END PV */
@@ -152,11 +148,6 @@ int main(void)
 
   HAL_TIM_PWM_Start(&htim12, TIM_CHANNEL_2);
 
-
-
-
-
-
   dom_init();
   gate_init();
 
@@ -165,7 +156,6 @@ int main(void)
 
   usb_subscribe(protocol_parser);
   protocol_init(usb_send);
-
 
   uart_init(&uart2);
   uart_init(&uart3);
