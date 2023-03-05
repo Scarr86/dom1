@@ -91,17 +91,17 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 }
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
-	__NOP();
-	for(uint8_t i = 0; i < UART_COUNT; ++i){
-		if(px_uart[i]->pxhuart == huart){
-			if(px_uart[i]->tx_len){
-				HAL_StatusTypeDef result = HAL_UART_Transmit_IT(px_uart[i]->pxhuart, px_uart[i]->tx_buf, px_uart[i]->tx_len);
-				if(result == HAL_OK){
-					px_uart[i]->tx_len = 0;
-				}
-			}
-		}
-	}
+//	__NOP();
+//	for(uint8_t i = 0; i < UART_COUNT; ++i){
+//		if(px_uart[i]->pxhuart == huart){
+//			if(px_uart[i]->tx_len){
+//				HAL_StatusTypeDef result = HAL_UART_Transmit_IT(px_uart[i]->pxhuart, px_uart[i]->tx_buf, px_uart[i]->tx_len);
+//				if(result == HAL_OK){
+//					px_uart[i]->tx_len = 0;
+//				}
+//			}
+//		}
+//	}
 }
 
 

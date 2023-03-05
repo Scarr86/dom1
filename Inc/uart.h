@@ -20,8 +20,8 @@ typedef struct xUart{
 	UART_HandleTypeDef * pxhuart;
 	//FIFO(UART_BUFFER_SIZE) tx_fifo;
 	FIFO(UART_BUFFER_SIZE) rx_fifo;
- 	uint8_t tx_buf[UART_BUFFER_SIZE];
-	uint16_t tx_len;
+ 	//uint8_t tx_buf[UART_BUFFER_SIZE];
+	//uint16_t tx_len;
 	uart_observer_tt observer[4];
 	uint8_t observer_count;
 }xUart_tt;
