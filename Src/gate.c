@@ -370,7 +370,7 @@ void gate_poll(uint8_t id){
 	}
 }
 
-void dome_poll(){
+void cupol_poll(){
 	gate_poll(GATE_1);
 	gate_poll(GATE_2);
 

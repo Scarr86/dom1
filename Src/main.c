@@ -94,7 +94,7 @@ static void MX_USART3_UART_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-char * str = "/h\r";
+//char * str = "/h\r";
 
 //void send_tst_str(uint8_t id){
 //	uart_send(&uart2, str, strlen(str));
@@ -151,11 +151,11 @@ int main(void)
   dom_init();
   gate_init();
 
-  usb_subscribe(cli_parser);
   cli_init(usb_send);
+  usb_subscribe(cli_parser);
 
-  usb_subscribe(protocol_parser);
   protocol_init(usb_send);
+  usb_subscribe(protocol_parser);
 
   uart_init(&uart2);
   uart_init(&uart3);
@@ -169,7 +169,7 @@ int main(void)
   uart_subscribe(&uart3, cli_parser_from_uart);
   uart_subscribe(&uart4, cli_parser_from_uart);
 
-  uart_send(&uart2, str, strlen(str));
+  //uart_send(&uart2, str, strlen(str));
 
   //dom_btn_subscribe(send_tst_str);
   /* USER CODE END 2 */
@@ -187,7 +187,7 @@ int main(void)
 	usb_poll();
 	uart_poll();
 	dom_poll();
-	dome_poll();
+	cupol_poll();
 
   }
   /* USER CODE END 3 */

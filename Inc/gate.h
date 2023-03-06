@@ -56,7 +56,7 @@ uint16_t gate_speed(uint8_t id);
 
 void gate_poll(uint8_t id);
 
-void dome_poll();
+void cupol_poll();
 
 //void dome_close();
 
