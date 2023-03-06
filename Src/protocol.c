@@ -120,8 +120,13 @@ void protocol_parser(uint8_t * buf, uint16_t len){
 
 		while(1){
 			uint8_t * feed = memchr(buffer, '\r', length );
-			if(feed == NULL)
+			if(feed == NULL){
+				if(length > 100){
+					length -= 100;
+					memcpy(buffer, buffer + 100, length);
+				}
 				break;
+			}
 			*feed = '\0';
 
 			uint16_t cmd_cnt = sizeof cmds / sizeof cmds[0];

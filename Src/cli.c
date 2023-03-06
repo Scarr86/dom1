@@ -93,7 +93,10 @@ void cli_parser_from_uart(xUart_tt * uart, uint8_t * buf, uint16_t len){
 
 void cli_parser(uint8_t * buf, uint16_t len){
 
-
+	char * cmd_start = memchr(buf, '/', len );
+	if(cmd_start){
+		cbuf_len = 0;
+	}
 	if(cbuf_len + len < CLI_BUF_SIZE){
 		memcpy(cbuf + cbuf_len, buf, len);
 		cbuf_len += len;
@@ -105,7 +108,7 @@ void cli_parser(uint8_t * buf, uint16_t len){
 				break;
 
 			*line_feed = '\0';
-			char * cmd_start = memchr(cbuf, '/', line_feed - cbuf );
+			cmd_start = memchr(cbuf, '/', line_feed - cbuf );
 			if(cmd_start){
 				cli_cmd_parser(cmd_start + 1 );
 			}
@@ -115,7 +118,6 @@ void cli_parser(uint8_t * buf, uint16_t len){
 		}
 	}
 	else{
-		cbuf_len = 0;
 		cbuf_owf = 1;
 	}
 }
