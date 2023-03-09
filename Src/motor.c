@@ -49,9 +49,9 @@ void motor_speed_set(xMotor_tt * m, uint16_t speed){
 	if(m->cur_speed == speed){
 		return;
 	}
-	if(timer_is_running(&m->accel_timer)){
-		return;
-	}
+//	if(timer_is_running(&m->accel_timer)){
+//		return;
+//	}
 
 
 	if(m->cur_speed > speed){

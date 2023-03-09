@@ -333,11 +333,11 @@ void gate_poll(uint8_t id){
 	}
 	else{
 		if(id == GATE_1){
-			if(!timer_is_running(&timer_sensor_led_1_error))
+			//if(!timer_is_running(&timer_sensor_led_1_error))
 				timer_set(&timer_sensor_led_1_error, 300, on_timer_sensor_led_error, &gates[id]);
 		}
 		if(id == GATE_2){
-			if(!timer_is_running(&timer_sensor_led_2_error))
+			//if(!timer_is_running(&timer_sensor_led_2_error))
 				timer_set(&timer_sensor_led_2_error, 300, on_timer_sensor_led_error, &gates[id]);
 		}
 	}

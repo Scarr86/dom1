@@ -74,8 +74,9 @@ void timer_stop(xTimer_tt * t){
 	timer_del(t);
 }
 void timer_set(xTimer_tt * t, uint32_t interval, on_timeout_fn on_timeout, void * thisArg){
+	if(!timer_is_running(t))
+		t->start = HAL_GetTick();
 	t->interval = interval;
-	t->start = HAL_GetTick();
 	t->thisArg = thisArg;
 	t->on_timeout = on_timeout;
 	timer_add(t);
