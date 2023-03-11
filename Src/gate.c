@@ -212,6 +212,7 @@ void gate_stop(xGate_tt * g){
 }
 
 void gate_change(GATE_ENUM id, GATE_STATE_ENUM new_state){
+	uint8_t oldst = gates[id].state;
 	gates[id].state = new_state;
 
 	if(new_state == GATE_STATE_STOP){
@@ -221,7 +222,8 @@ void gate_change(GATE_ENUM id, GATE_STATE_ENUM new_state){
 		dom_led_on(LED_MOTOR_MOVE);
 	}
 
-	gate_notify(id);
+	if(oldst != new_state)
+		gate_notify(id);
 }
 
 void gate_leaf_stop_def(){
