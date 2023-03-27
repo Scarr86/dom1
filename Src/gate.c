@@ -109,6 +109,37 @@ void gate_init(){
 	gates[GATE_2].angle = -1;
 	gate_stop(&gates[GATE_1]);
 	gate_stop(&gates[GATE_2]);
+
+	if(dom_sensor_is_detected(gates[GATE_1].sid[0])){// close leaf 1 gate 1
+		dom_motor_save_pos_90(gates[GATE_1].mid[0]);
+	}
+	if(dom_sensor_is_detected(gates[GATE_1].sid[2])){// close leaf 2 gate 1
+		dom_motor_save_pos_90(gates[GATE_1].mid[1]);
+	}
+
+	if(dom_sensor_is_detected(gates[GATE_2].sid[0])){// close leaf 1 gate 2
+		dom_motor_save_pos_90(gates[GATE_2].mid[0]);
+	}
+	if(dom_sensor_is_detected(gates[GATE_2].sid[2])){// close leaf 2 gate 2
+		dom_motor_save_pos_90(gates[GATE_2].mid[1]);
+	}
+
+
+	if(dom_sensor_is_detected(gates[GATE_1].sid[1])){// open leaf 1 gate 1
+		dom_motor_save_pos_0(gates[GATE_1].mid[0]);
+	}
+	if(dom_sensor_is_detected(gates[GATE_1].sid[3])){// open leaf 2 gate 1
+		dom_motor_save_pos_0(gates[GATE_1].mid[1]);
+	}
+
+	if(dom_sensor_is_detected(gates[GATE_2].sid[1])){// open leaf 1 gate 2
+		dom_motor_save_pos_0(gates[GATE_2].mid[0]);
+	}
+	if(dom_sensor_is_detected(gates[GATE_2].sid[3])){// open leaf 2 gate 2
+		dom_motor_save_pos_0(gates[GATE_2].mid[1]);
+	}
+
+
 }
 
 xGate_tt * get_gate(GATE_ENUM id){
