@@ -55,19 +55,19 @@ uint8_t tbuf[80];
 uint16_t cbuf_len;
 uint8_t cbuf_owf;
 
-cli_sender_tt sender;
+static cli_sender_tt sender;
 
 static cli_sender_tt cli_save_sender;
 
-static xUart_tt * cli_sender = NULL;
+static xUart_tt * cli_uart = NULL;
 
 uint8_t cli_uart_sender(uint8_t * buf, uint16_t len);
 void parser_btn(uint8_t id, uint8_t * p);
 
 
 uint8_t cli_uart_sender(uint8_t * buf, uint16_t len){
-	if(cli_sender){
-		uart_send(cli_sender, buf, len );
+	if(cli_uart){
+		uart_send(cli_uart, buf, len );
 		return 0;
 	}
 	return 1;
@@ -84,7 +84,7 @@ void cli_init(cli_sender_tt cli_sender){
 }
 
 void cli_parser_from_uart(xUart_tt * uart, uint8_t * buf, uint16_t len){
-	cli_sender = uart;
+	cli_uart = uart;
 	cli_save_sender = sender;
 	sender = cli_uart_sender;
 	cli_parser(buf, len);
@@ -110,7 +110,7 @@ void cli_parser(uint8_t * buf, uint16_t len){
 			*line_feed = '\0';
 			cmd_start = memchr(cbuf, '/', line_feed - cbuf );
 			if(cmd_start){
-				cli_cmd_parser(cmd_start + 1 );
+				cli_cmd_parser((uint8_t*)cmd_start + 1 );
 			}
 
 			cbuf_len -= line_feed + 1 - cbuf;

@@ -15,6 +15,8 @@
 struct xUart;
 typedef void (*uart_observer_tt)(struct xUart * uart, uint8_t * buf, uint16_t len);
 
+typedef void (*uart_rede485_tt)(uint8_t);
+
 typedef struct xUart{
 	uint8_t need_poll;
 	UART_HandleTypeDef * pxhuart;
@@ -24,6 +26,9 @@ typedef struct xUart{
 	//uint16_t tx_len;
 	uart_observer_tt observer[4];
 	uint8_t observer_count;
+
+	uart_rede485_tt toggleReDe;
+
 }xUart_tt;
 
 

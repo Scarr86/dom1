@@ -59,8 +59,20 @@ TIM_HandleTypeDef htim12;
 UART_HandleTypeDef huart4;
 UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart3;
+UART_HandleTypeDef huart6;
 
 /* USER CODE BEGIN PV */
+
+void re_de_485(uint8_t rede){
+	if(rede){
+		HAL_GPIO_WritePin(DE485_GPIO_Port, DE485_Pin, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(RE485_GPIO_Port, RE485_Pin, GPIO_PIN_SET);
+	}
+	else{
+		HAL_GPIO_WritePin(DE485_GPIO_Port, DE485_Pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(RE485_GPIO_Port, RE485_Pin, GPIO_PIN_RESET);
+	}
+}
 
 xUart_tt uart2 = {
 		.pxhuart = &huart2
@@ -68,10 +80,16 @@ xUart_tt uart2 = {
 
 xUart_tt uart3 = {
 		.pxhuart = &huart3
+
 };
 
 xUart_tt uart4 = {
 		.pxhuart = &huart4
+};
+
+xUart_tt uart6 = {
+		.pxhuart = &huart6,
+		.toggleReDe = re_de_485
 };
 
 
@@ -87,6 +105,7 @@ static void MX_IWDG_Init(void);
 static void MX_UART4_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_USART3_UART_Init(void);
+static void MX_USART6_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -137,6 +156,7 @@ int main(void)
   MX_UART4_Init();
   MX_USART2_UART_Init();
   MX_USART3_UART_Init();
+  MX_USART6_UART_Init();
   /* USER CODE BEGIN 2 */
 
   HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
@@ -160,14 +180,17 @@ int main(void)
   uart_init(&uart2);
   uart_init(&uart3);
   uart_init(&uart4);
+  uart_init(&uart6);
 
   uart_subscribe(&uart2, protocol_parser_from_uart);
   uart_subscribe(&uart3, protocol_parser_from_uart);
   uart_subscribe(&uart4, protocol_parser_from_uart);
+  uart_subscribe(&uart6, protocol_parser_from_uart);
 
   uart_subscribe(&uart2, cli_parser_from_uart);
   uart_subscribe(&uart3, cli_parser_from_uart);
   uart_subscribe(&uart4, cli_parser_from_uart);
+  uart_subscribe(&uart6, cli_parser_from_uart);
 
   //uart_send(&uart2, str, strlen(str));
 
@@ -532,6 +555,39 @@ static void MX_USART3_UART_Init(void)
 }
 
 /**
+  * @brief USART6 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART6_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART6_Init 0 */
+
+  /* USER CODE END USART6_Init 0 */
+
+  /* USER CODE BEGIN USART6_Init 1 */
+
+  /* USER CODE END USART6_Init 1 */
+  huart6.Instance = USART6;
+  huart6.Init.BaudRate = 9600;
+  huart6.Init.WordLength = UART_WORDLENGTH_8B;
+  huart6.Init.StopBits = UART_STOPBITS_1;
+  huart6.Init.Parity = UART_PARITY_NONE;
+  huart6.Init.Mode = UART_MODE_TX_RX;
+  huart6.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart6.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart6) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART6_Init 2 */
+
+  /* USER CODE END USART6_Init 2 */
+
+}
+
+/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -560,7 +616,11 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOG, GP_REL_1_Pin|DIR_REL_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOE, LED_MOTOR_MOVE_Pin|LED_OPEN_CLOSE_GATE_1_Pin|LED_OPEN_CLOSE_GATE_2_Pin|LED_RAIN_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOE, LED_MOTOR_MOVE_Pin|LED_OPEN_CLOSE_GATE_1_Pin|LED_OPEN_CLOSE_GATE_2_Pin|LED_RAIN_Pin
+                          |DE485_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(RE485_GPIO_Port, RE485_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : SENSOR_RAIN_Pin SW_PWDG_OFF_Pin SW_LED_OFF_Pin */
   GPIO_InitStruct.Pin = SENSOR_RAIN_Pin|SW_PWDG_OFF_Pin|SW_LED_OFF_Pin;
@@ -590,12 +650,21 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : LED_MOTOR_MOVE_Pin LED_OPEN_CLOSE_GATE_1_Pin LED_OPEN_CLOSE_GATE_2_Pin LED_RAIN_Pin */
-  GPIO_InitStruct.Pin = LED_MOTOR_MOVE_Pin|LED_OPEN_CLOSE_GATE_1_Pin|LED_OPEN_CLOSE_GATE_2_Pin|LED_RAIN_Pin;
+  /*Configure GPIO pins : LED_MOTOR_MOVE_Pin LED_OPEN_CLOSE_GATE_1_Pin LED_OPEN_CLOSE_GATE_2_Pin LED_RAIN_Pin
+                           DE485_Pin */
+  GPIO_InitStruct.Pin = LED_MOTOR_MOVE_Pin|LED_OPEN_CLOSE_GATE_1_Pin|LED_OPEN_CLOSE_GATE_2_Pin|LED_RAIN_Pin
+                          |DE485_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : RE485_Pin */
+  GPIO_InitStruct.Pin = RE485_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(RE485_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : CLOSE_1_Pin OPEN_1_Pin CLOSE_2_Pin OPEN_2_Pin
                            CLOSE_3_Pin OPEN_3_Pin */

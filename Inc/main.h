@@ -87,6 +87,10 @@ void Error_Handler(void);
 #define LED_OPEN_CLOSE_GATE_2_GPIO_Port GPIOE
 #define LED_RAIN_Pin GPIO_PIN_14
 #define LED_RAIN_GPIO_Port GPIOE
+#define DE485_Pin GPIO_PIN_15
+#define DE485_GPIO_Port GPIOE
+#define RE485_Pin GPIO_PIN_11
+#define RE485_GPIO_Port GPIOB
 #define LED_PWM_1_Pin GPIO_PIN_14
 #define LED_PWM_1_GPIO_Port GPIOB
 #define PWM1_Pin GPIO_PIN_15
