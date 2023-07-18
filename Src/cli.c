@@ -61,11 +61,11 @@ static cli_sender_tt cli_save_sender;
 
 static xUart_tt * cli_sender = NULL;
 
-uint8_t def_sender(uint8_t * buf, uint16_t len);
+uint8_t cli_uart_sender(uint8_t * buf, uint16_t len);
 void parser_btn(uint8_t id, uint8_t * p);
 
 
-uint8_t def_sender(uint8_t * buf, uint16_t len){
+uint8_t cli_uart_sender(uint8_t * buf, uint16_t len){
 	if(cli_sender){
 		uart_send(cli_sender, buf, len );
 		return 0;
@@ -74,7 +74,7 @@ uint8_t def_sender(uint8_t * buf, uint16_t len){
 }
 
 void cli_init(cli_sender_tt cli_sender){
-	sender = cli_sender ? cli_sender: def_sender;
+	sender = cli_sender ? cli_sender: cli_uart_sender;
 	cbuf_len = 0;
 	cbuf_owf = 0;
 
@@ -86,7 +86,7 @@ void cli_init(cli_sender_tt cli_sender){
 void cli_parser_from_uart(xUart_tt * uart, uint8_t * buf, uint16_t len){
 	cli_sender = uart;
 	cli_save_sender = sender;
-	sender = def_sender;
+	sender = cli_uart_sender;
 	cli_parser(buf, len);
 	sender = cli_save_sender;
 }
