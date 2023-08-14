@@ -9,6 +9,7 @@
 #include "protocol.h"
 #include "string.h"
 #include "stdio.h"
+#include "uart.h"
 #define PROTOCOL_BUF_SIZE (1000)
 static uint8_t buffer[PROTOCOL_BUF_SIZE];
 static uint8_t tx_buffer[PROTOCOL_BUF_SIZE];
@@ -28,7 +29,7 @@ void handler_cmd_get_move_params(uint8_t * params, uint16_t len);
 void handler_cmd_set_move_params(uint8_t * params, uint16_t len);
 void handler_cmd_gettlm(uint8_t * params, uint16_t len);
 
-void on_pwdg_timeout(xTimer_tt * t , void * thisArg);
+
 
 typedef struct sTlm{
 	uint8_t c1:1;
@@ -96,11 +97,12 @@ static uint8_t def_sender(char * buf, uint16_t len);
 uint8_t def_sender(char * buf, uint16_t len){
 	if(uart_sender)
 		uart_send(uart_sender, buf, len );
+	return 0;
 }
 
-void protocol_init(protocol_sender_tt protocol_sender){
+void protocol_init(protocol_sender_tt protocol_sender, on_timeout_fn on_timeout){
 	sender = protocol_sender ? protocol_sender: def_sender;
-	pwdg_init(on_pwdg_timeout);
+	pwdg_init(on_timeout);
 }
 
 
@@ -311,7 +313,4 @@ void handler_cmd_gettlm(uint8_t * params, uint16_t len){
 	sender(tx_buffer, strlen(tx_buffer));
 }
 
-void on_pwdg_timeout(xTimer_tt * t , void * thisArg){
-	cupol_open(GATE_1, 0);
-	cupol_open(GATE_2, 0);
-}
+

@@ -47,6 +47,10 @@ void motor_init(xMotor_tt * m, uint8_t id);
 void motor_stop(xMotor_tt * m);
 void motor_forward(xMotor_tt * m, uint16_t speed);
 void motor_back(xMotor_tt * m, uint16_t speed);
+
+void motor_rele_forward(xMotor_tt * m);
+void motor_rele_back(xMotor_tt * m);
+
 void motor_speed_set(xMotor_tt * m, uint16_t speed);
 void motor_set(xMotor_tt * m, int8_t dir, int16_t speed, int16_t deg_speed, int16_t accel);
 uint16_t motor_speed(xMotor_tt *m);

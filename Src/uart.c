@@ -6,7 +6,7 @@
  */
 #include "uart.h"
 
-#define UART_COUNT (4)
+#define UART_COUNT (8)
 xUart_tt * px_uart[UART_COUNT];
 uint8_t uart_count = 0;
 

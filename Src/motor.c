@@ -28,7 +28,7 @@ void motor_init(xMotor_tt * m, uint8_t id){
 	motor_stop(m);
 }
 void motor_stop(xMotor_tt * m){
-
+	motor_rele_back(m);
 	m->state = MOTOR_STATE_STOP;
 	m->cur_speed = m->cur_speed > m->accel ? m->cur_speed - m->accel: 0;
 	*((uint32_t *)m->ccr) = m->cur_speed;
@@ -76,10 +76,18 @@ void motor_speed_set(xMotor_tt * m, uint16_t speed){
 	*((uint32_t *)m->ccr) = m->cur_speed;
 }
 
-void motor_forward(xMotor_tt * m, uint16_t speed){
-	m->state = MOTOR_STATE_FORWARD;
+void motor_rele_forward(xMotor_tt * m){
 	if(m->GPIOx && m->pin)
 		HAL_GPIO_WritePin(m->GPIOx, m->pin, m->dir);
+}
+void motor_rele_back(xMotor_tt * m){
+	if(m->GPIOx && m->pin)
+		HAL_GPIO_WritePin(m->GPIOx, m->pin, !m->dir);
+}
+
+void motor_forward(xMotor_tt * m, uint16_t speed){
+	m->state = MOTOR_STATE_FORWARD;
+	motor_rele_forward(m);
 	motor_speed_set(m, speed);
 	motor_pos_start(m, calc_pos_inc);
 	//*((uint32_t *)m->ccr) = m->cur_speed;
@@ -89,8 +97,7 @@ void motor_forward(xMotor_tt * m, uint16_t speed){
 
 void motor_back(xMotor_tt * m, uint16_t speed){
 	m->state = MOTOR_STATE_BACK;
-	if(m->GPIOx && m->pin)
-		HAL_GPIO_WritePin(m->GPIOx, m->pin, !m->dir);
+	motor_rele_back(m);
 	motor_speed_set(m, speed);
 	motor_pos_start(m, calc_pos_dec);
 }

@@ -108,6 +108,8 @@ static void MX_USART3_UART_Init(void);
 static void MX_USART6_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
+void on_pwdg_timeout(xTimer_tt * t , void * thisArg);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -118,6 +120,22 @@ static void MX_USART6_UART_Init(void);
 //void send_tst_str(uint8_t id){
 //	uart_send(&uart2, str, strlen(str));
 //}
+uint8_t resetMotor[4][8] = {
+		{0x02, 0x06, 0x81, 0x04, 0x3f, 0x00, 0x00, 0xbe},
+		{0x02, 0x06, 0x81, 0x04, 0x3f, 0x00, 0x00, 0xbe},
+		{0x02, 0x06, 0x81, 0x04, 0x3f, 0x00, 0x00, 0xbe},
+		{0x02, 0x06, 0x81, 0x04, 0x3f, 0x00, 0x00, 0xbe}
+};
+
+void on_pwdg_timeout(xTimer_tt * t , void * thisArg){
+	for(int i = 0; i < 4; ++i){
+		uart_send(&uart6, resetMotor[i], 8);
+	}
+	cupol_open(GATE_1, 0);
+	cupol_open(GATE_2, 0);
+}
+
+
 /* USER CODE END 0 */
 
 /**
@@ -174,7 +192,7 @@ int main(void)
   cli_init(usb_send);
   usb_subscribe(cli_parser);
 
-  protocol_init(usb_send);
+  protocol_init(usb_send, on_pwdg_timeout);
   usb_subscribe(protocol_parser);
 
   uart_init(&uart2);
